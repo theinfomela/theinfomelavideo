@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InfoMela Video-Ready Banner Generator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Noto+Sans+Bengali:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Base Styles */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 30px;
+      color: #fff;
+    }
+    .main-container {
+      max-width: 1600px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 400px 1fr;
+      gap: 40px;
+    }
+
+    /* Control Panel */
+    .control-panel {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 35px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      position: sticky;
+      top: 30px;
+    }
+    .control-panel h1 { color: #667eea; font-size: 1.8rem; margin-bottom: 10px; font-weight: 800; }
+    .control-panel p { color: #666; margin-bottom: 30px; font-size: 0.95rem; }
+    .form-group { margin-bottom: 25px; }
+    .form-group label {
+      display: block; color: #333; font-weight: 700; margin-bottom: 10px; font-size: 0.95rem;
+    }
+    .form-group input[type="date"], .form-group textarea, .form-group select {
+      width: 100%; padding: 14px; border: 2px solid #e0e0e0; border-radius: 10px;
+      font-size: 1rem; font-family: inherit; transition: all 0.3s; background: #f9f9f9;
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+      outline: none; border-color: #667eea; background: white;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+    .form-group textarea { min-height: 80px; resize: vertical; }
+    .upload-box {
+      border: 3px dashed #667eea; border-radius: 15px; padding: 30px; text-align: center;
+      cursor: pointer; transition: all 0.3s; background: #f0f4ff;
+    }
+    .upload-box:hover { background: #e6edff; border-color: #5568d3; transform: translateY(-2px); }
+    .upload-box input { display: none; }
+    .upload-icon { font-size: 3rem; margin-bottom: 10px; color: #667eea; }
+    .upload-text { color: #667eea; font-weight: 600; font-size: 1rem; }
+    .file-info { margin-top: 10px; font-size: 0.85rem; color: #666; }
+
+    /* Download Buttons */
+    .btn-download {
+      width: 100%; padding: 18px; border: none; border-radius: 12px; font-size: 1.1rem;
+      font-weight: 700; cursor: pointer; transition: all 0.3s; margin-top: 15px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .btn-english {
+      background: linear-gradient(135deg, #eb4141 0%, #a50000 100%);
+      color: white; box-shadow: 0 10px 30px rgba(171, 0, 0, 0.35);
+    }
+    .btn-bangla {
+      background: linear-gradient(135deg, #ff9156 0%, #ff2b2b 100%);
+      color: white; box-shadow: 0 10px 30px rgba(255, 58, 58, 0.4);
+    }
+    .btn-download:hover {
+      transform: translateY(-3px); box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Preview Section */
+    .preview-section { display: flex; flex-direction: column; gap: 40px; }
+    .preview-container {
+      background: white; border-radius: 20px; padding: 30px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    .preview-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #f0f0f0;
+    }
+    .preview-header h2 { color: #333; font-size: 1.5rem; font-weight: 700; }
+    .lang-badge {
+      background: linear-gradient(135deg, #eb4141 0%, #a50000 100%);
+      color: white; padding: 8px 20px; border-radius: 20px; font-size: 0.9rem; font-weight: 700;
+    }
+    .lang-badge.bangla {
+      background: linear-gradient(135deg, #ff9156 0%, #ff2b2b 100%);
+    }
+
+    /* Banner Wrapper (Frame) */
+    .banner-wrapper {
+      width: 715px; height: 715px; /* Default square, will be overridden by JS */
+      margin: 0 auto; padding: 18px;
+      background: #f7f7f7; border-radius: 22px; border: 12px solid #d32f2f; /* Dynamic color */
+      position: relative; overflow: hidden; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+      transition: width 0.3s ease, height 0.3s ease; /* Smooth resizing */
+    }
+    .banner {
+      width: 100%; height: 100%; position: relative; background: white; border-radius: 16px;
+      overflow: hidden; border: 3px solid rgba(211, 47, 47, 0.6); /* Dynamic color */
+      display: flex; flex-direction: column; /* Allow content to stack */
+    }
+
+    /* Top Strip - Red Header */
+    .top-strip {
+      background: linear-gradient(90deg, rgba(211,47,47,1) 0%, rgba(166,0,0,1) 100%); /* Dynamic color */
+      color: white; padding: 18px 28px; display: flex; justify-content: space-between;
+      align-items: center; position: relative; z-index: 2;
+    }
+    .brand-area {
+      display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 1.25rem;
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+    .brand-logo {
+      max-width: 110px; max-height: 48px; filter: brightness(0.85); opacity: 0.9;
+    }
+    .date-badge {
+      background: rgba(255,255,255,0.18); padding: 8px 18px; border-radius: 30px;
+      font-weight: 700; font-size: 0.9rem; letter-spacing: 0.5px;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    /* Image Panel - Extended Ratio */
+    .image-panel {
+      position: relative;
+      flex-grow: 1; /* Allow image to fill available vertical space */
+      margin: 0 28px;
+      margin-top: 15px;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 6px solid rgba(211, 47, 47, 0.85); /* Dynamic color */
+      box-shadow: 0 12px 28px rgba(0,0,0,0.25);
+    }
+    .image-panel img {
+      width: 100%; height: 100%; object-fit: cover;
+      /* Refined image filters for natural high quality */
+      filter: brightness(1.08) contrast(1.1) saturate(1.05);
+    }
+    .image-overlay {
+      position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.6) 100%);
+    }
+
+    /* Headline Area */
+    .headline-area {
+      margin: 15px 28px 10px;
+      padding: 18px 22px; background: #fff;
+      border-radius: 12px; border: 1px solid rgba(211, 47, 47, 0.35); /* Dynamic color */
+      box-shadow: 0 10px 18px rgba(0, 0, 0, 0.1);
+    }
+    .headline-text {
+      color: #c80000; /* Dynamic color */
+      font-size: 1.5rem; font-weight: 800; line-height: 1.4;
+    }
+
+    /* CTA Ribbon */
+    .cta-ribbon {
+      margin: 0 28px 15px;
+      padding: 14px 26px;
+      background: linear-gradient(90deg, rgba(211,47,47,1) 0%, rgba(166,0,0,1) 100%); /* Dynamic color */
+      color: white; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 1px; border-radius: 12px; text-align: center;
+      box-shadow: 0 8px 20px rgba(211,47,47,0.45);
+    }
+    .cta-ribbon.hidden {
+        display: none;
+    }
+
+    /* Footer Bar - Social Handles */
+    .footer-bar {
+      background: #222; padding: 16px 15px;
+      display: flex; justify-content: center; align-items: center; gap: 18px;
+      border-top: 3px solid rgba(211, 47, 47, 0.8); /* Dynamic color */
+      flex-wrap: wrap;
+    }
+    .social-item {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.95rem; /* Slightly larger for clarity */
+      font-weight: 700; color: white;
+    }
+    .social-icon {
+      width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; font-size: 0.9rem; font-weight: 700; color: #fff;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    .icon-facebook { background: #1877F2; }
+    .icon-twitter { background: #000; }
+    .icon-youtube { background: #FF0000; }
+    .icon-instagram {
+      background: linear-gradient(45deg,#f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);
+    }
+
+    /* Bangla specific font */
+    .bangla-text { font-family: 'Noto Sans Bengali', sans-serif; }
+
+    /* Responsive adjustments */
+    @media (max-width: 1200px) {
+      .main-container { grid-template-columns: 1fr; }
+      .control-panel { position: static; }
+      .banner-wrapper { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="main-container">
+  <!-- CONTROL PANEL -->
+  <div class="control-panel">
+    <h1>🟥 InfoMela Video-Ready Studio</h1>
+    <p>Create professional, high-quality images perfectly sized for your video platforms!</p>
+
+    <div class="form-group">
+      <label>📅 Date</label>
+      <input type="date" id="bannerDate">
+    </div>
+
+    <div class="form-group">
+      <label>💻 Video Platform</label>
+      <select id="videoPlatformSelect">
+        <option value="square">Universal Square (1:1)</option>
+        <option value="youtube">YouTube (16:9 Landscape)</option>
+        <option value="facebook_portrait">Facebook (4:5 Portrait)</option>
+        <option value="instagram_story">Instagram/TikTok (9:16 Story)</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>🖼️ Logo Upload</label>
+      <div class="upload-box" onclick="document.getElementById('logoInput').click()">
+        <input type="file" id="logoInput" accept="image/*">
+        <div class="upload-icon">📷</div>
+        <div class="upload-text">Click to upload logo</div>
+        <div class="file-info" id="logoInfo">PNG or SVG recommended</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>📸 Headline Image</label>
+      <div class="upload-box" onclick="document.getElementById('imageInput').click()">
+        <input type="file" id="imageInput" accept="image/*">
+        <div class="upload-icon">🖼️</div>
+        <div class="upload-text">Click to upload image</div>
+        <div class="file-info" id="imageInfo">Auto enhanced & upscaled</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>✍️ English Headline</label>
+      <textarea id="captionEN">HASINA BUILT A MOSQUE IN DHAKA; WHAT WOULD BNP DO?</textarea>
+    </div>
+
+    <div class="form-group">
+      <label>✍️ বাংলা শিরোনাম</label>
+      <textarea id="captionBN" class="bangla-text">হাসিনা সৌদি ফেরত ঢাকায় মসজিদ তৈরি করেছে; বিএনপি ক্ষমতায় গেলে মন্দির তৈরি করবে?</textarea>
+    </div>
+
+    <button class="btn-download btn-english" onclick="downloadVideoImage('english')">
+      📥 Download English Image for Video
+    </button>
+
+    <button class="btn-download btn-bangla" onclick="downloadVideoImage('bangla')">
+      📥 বাংলা ভিডিও ইমেজ ডাউনলোড করুন
+    </button>
+  </div>
+
+  <!-- PREVIEW SECTION -->
+  <div class="preview-section">
+    <!-- ENGLISH PREVIEW -->
+    <div class="preview-container">
+      <div class="preview-header">
+        <h2>English Preview</h2>
+        <span class="lang-badge">ENGLISH</span>
+      </div>
+      <div class="banner-wrapper" id="frameEN">
+        <div class="banner" id="bannerEN">
+          <div class="top-strip">
+            <div class="brand-area">
+              <img class="brand-logo" id="logoEN" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='48' viewBox='0 0 200 80'%3E%3Crect fill='%23ffffff' width='200' height='80' rx='10'/%3E%3Ctext x='100' y='50' font-family='Arial' font-size='32' font-weight='bold' fill='%23d32f2f' text-anchor='middle'%3EInfoMela%3C/text%3E%3C/svg%3E" alt="Logo">
+              <span>News.Fun.Facts</span>
+            </div>
+            <div class="date-badge" id="dateEN">11 OCTOBER 2025</div>
+          </div>
+
+          <div class="image-panel">
+            <img id="bgImageEN" src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1500&q=80" alt="Headline">
+            <div class="image-overlay"></div>
+          </div>
+
+          <div class="headline-area">
+            <div class="headline-text" id="captionDisplayEN">
+              HASINA BUILT A MOSQUE IN DHAKA; WHAT WOULD BNP DO?
+            </div>
+          </div>
+
+          <div class="cta-ribbon" id="ctaEN">DETAILS IN COMMENTS</div>
+
+          <div class="footer-bar">
+            <div class="social-item">
+              <div class="social-icon icon-facebook">f</div>
+              <span>@theinfomelaa</span>
+            </div>
+            <div class="social-item">
+              <div class="social-icon icon-twitter">𝕏</div>
+              <span>@theinfomela</span>
+            </div>
+            <div class="social-item">
+              <div class="social-icon icon-youtube">▶</div>
+              <span>@theinfomela</span>
+            </div>
+            <div class="social-item">
+              <div class="social-icon icon-instagram">⧉</div>
+              <span>@theinfomela</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BANGLA PREVIEW -->
+    <div class="preview-container">
+      <div class="preview-header">
+        <h2>বাংলা প্রিভিউ</h2>
+        <span class="lang-badge bangla">বাংলা</span>
+      </div>
+      <div class="banner-wrapper" id="frameBN">
+        <div class="banner" id="bannerBN">
+          <div class="top-strip">
+            <div class="brand-area bangla-text">
+              <img class="brand-logo" id="logoBN" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='48' viewBox='0 0 200 80'%3E%3Crect fill='%23ffffff' width='200' height='80' rx='10'/%3E%3Ctext x='100' y='50' font-family='Arial' font-size='32' font-weight='bold' fill='%23d32f2f' text-anchor='middle'%3Eইনফো মেলা%3C/text%3E%3C/svg%3E" alt="Logo">
+              <span>খবর.মজা.তথ্য</span>
+            </div>
+            <div class="date-badge bangla-text" id="dateBN">১১ অক্টোবর ২০২৫</div>
+          </div>
+
+          <div class="image-panel">
+            <img id="bgImageBN" src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1500&q=80" alt="Headline">
+            <div class="image-overlay"></div>
+          </div>
+
+          <div class="headline-area bangla-text">
+            <div class="headline-text bangla-text" id="captionDisplayBN">
+              হাসিনা সৌদি ফেরত ঢাকায় মসজিদ তৈরি করেছে; বিএনপি ক্ষমতায় গেলে মন্দির তৈরি করবে?
+            </div>
+          </div>
+
+          <div class="cta-ribbon" id="ctaBN">বিস্তারিত কমেন্টে</div>
+
+          <div class="footer-bar">
+            <div class="social-item">
+              <div class="social-icon icon-facebook">f</div>
+              <span>@theinfomelaa</span>
+            </div>
+            <div class="social-item">
+              <div class="social-icon icon-twitter">𝕏</div>
+              <span>@theinfomela</span>
+            </div>
+            <div class="social-item">
+              <div class="social-icon icon-youtube">▶</div>
+              <span>@theinfomela</span>
+            </div>
+            <div class="social-item">
+              <div class="social-icon icon-instagram">⧉</div>
+              <span>@theinfomela</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const today = new Date();
+    document.getElementById('bannerDate').value = today.toISOString().split('T')[0];
+    updateDate();
+    document.getElementById('bannerDate').addEventListener('change', updateDate);
+    document.getElementById('videoPlatformSelect').addEventListener('change', updateBannerLayout);
+    document.getElementById('logoInput').addEventListener('change', handleLogoUpload);
+    document.getElementById('imageInput').addEventListener('change', handleImageUpload);
+    document.getElementById('captionEN').addEventListener('input', updateCaptions);
+    document.getElementById('captionBN').addEventListener('input', updateCaptions);
+    
+    updateCaptions(); // Initial caption update
+    updateBannerLayout(); // Set initial banner size and CTA visibility
+  });
+
+  // --- Date Handling ---
+  function updateDate() {
+    const dateStr = document.getElementById('bannerDate').value;
+    if (!dateStr) return;
+    const date = new Date(dateStr + 'T00:00:00');
+
+    const optionsEN = { year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('dateEN').textContent = date.toLocaleDateString('en-GB', optionsEN).toUpperCase();
+    
+    const monthsBN = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
+    const bnDay = date.getDate();
+    const bnMonth = monthsBN[date.getMonth()];
+    const bnYear = date.getFullYear();
+    document.getElementById('dateBN').textContent = `${bnDay} ${bnMonth} ${bnYear}`;
+  }
+
+  // --- Caption Handling ---
+  function updateCaptions() {
+    document.getElementById('captionDisplayEN').textContent = document.getElementById('captionEN').value;
+    document.getElementById('captionDisplayBN').textContent = document.getElementById('captionBN').value;
+  }
+
+  // --- Logo Handling & Color Extraction ---
+  function handleLogoUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    document.getElementById('logoInfo').textContent = file.name;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      document.getElementById('logoEN').src = event.target.result;
+      document.getElementById('logoBN').src = event.target.result;
+      extractDominantColor(event.target.result);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function extractDominantColor(src) {
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+
+      let r = 0, g = 0, b = 0, count = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        if (data[i+3] > 120) {
+          r += data[i];
+          g += data[i + 1];
+          b += data[i + 2];
+          count++;
+        }
+      }
+      if (count === 0) return;
+
+      r = Math.round(r / count);
+      g = Math.round(g / count);
+      b = Math.round(b / count);
+      const hex = '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+      applyBrandColor(hex);
+    };
+    img.src = src;
+  }
+
+  function applyBrandColor(color) {
+    const frameWrappers = document.querySelectorAll('.banner-wrapper');
+    frameWrappers.forEach(frame => {
+      frame.style.borderColor = color;
+    });
+
+    const elementsToTint = [
+      { selector: '.banner', prop: 'borderColor', color: shadeColor(color, -20), opacity: 0.6 },
+      { selector: '.top-strip', prop: 'background', gradient: true, color1: color, color2: shadeColor(color, -40) },
+      { selector: '.cta-ribbon', prop: 'background', gradient: true, color1: color, color2: shadeColor(color, -40) },
+      { selector: '.image-panel', prop: 'borderColor', color: shadeColor(color, -20), opacity: 0.85 },
+      { selector: '.headline-area', prop: 'borderColor', color: color, opacity: 0.35 },
+      { selector: '.footer-bar', prop: 'borderTopColor', color: color, opacity: 0.8 }
+    ];
+
+    elementsToTint.forEach(item => {
+      document.querySelectorAll(item.selector).forEach(el => {
+        if (item.gradient) {
+          el.style[item.prop] = `linear-gradient(90deg, ${item.color1} 0%, ${item.color2} 100%)`;
+        } else {
+          let finalColor = item.color || color;
+          if (item.opacity) {
+            const rgba = hexToRgba(finalColor, item.opacity);
+            el.style[item.prop] = rgba;
+          } else {
+            el.style[item.prop] = finalColor;
+          }
+        }
+      });
+    });
+
+    document.querySelectorAll('.headline-text').forEach(el => {
+      el.style.color = shadeColor(color, -10);
+    });
+  }
+
+  // --- Color Helper Functions ---
+  function shadeColor(color, percent) {
+    const num = parseInt(color.slice(1), 16);
+    const amt = Math.round(2.55 * percent);
+    let R = (num >> 16) + amt;
+    let G = (num >> 8 & 0x00FF) + amt;
+    let B = (num & 0x0000FF) + amt;
+    return '#' + (
+      0x1000000 +
+      (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
+      (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
+      (B < 255 ? (B < 1 ? 0 : B) : 255)
+    ).toString(16).slice(1).toUpperCase();
+  }
+
+  function hexToRgba(hex, alpha) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  // --- Image Upload & Enhancement ---
+  function handleImageUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    document.getElementById('imageInfo').textContent = file.name;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload =() => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.filter = 'brightness(1.08) contrast(1.1) saturate(1.05)';
+        ctx.drawImage(img, 0, 0, img.width, img.height);
+        const enhanced = canvas.toDataURL('image/jpeg', 0.98);
+        document.getElementById('bgImageEN').src = enhanced;
+        document.getElementById('bgImageBN').src = enhanced;
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // --- Video Platform & Aspect Ratio Logic ---
+  const aspectRatioMap = {
+    'square': { width: 715, height: 715, name: 'Universal_Square' },    // 1:1
+    'youtube': { width: 715, height: 402, name: 'YouTube_Landscape' },   // 16:9 (715 * 9 / 16 = 402.18)
+    'facebook_portrait': { width: 572, height: 715, name: 'Facebook_Portrait' }, // 4:5 (715 * 4 / 5 = 572)
+    'instagram_story': { width: 402, height: 715, name: 'Instagram_Story' }  // 9:16 (715 * 9 / 16 = 402.18)
+  };
+
+  function updateBannerLayout() {
+    const selectedPlatform = document.getElementById('videoPlatformSelect').value;
+    const dimensions = aspectRatioMap[selectedPlatform];
+
+    const frameEN = document.getElementById('frameEN');
+    const frameBN = document.getElementById('frameBN');
+    const ctaEN = document.getElementById('ctaEN');
+    const ctaBN = document.getElementById('ctaBN');
+
+    // Apply dimensions to both English and Bangla banners
+    frameEN.style.width = `${dimensions.width}px`;
+    frameEN.style.height = `${dimensions.height}px`;
+    frameBN.style.width = `${dimensions.width}px`;
+    frameBN.style.height = `${dimensions.height}px`;
+
+    // Hide CTA for video platforms
+    const isVideoPlatform = selectedPlatform !== 'square'; // Assuming 'square' might be for static posts
+    if (isVideoPlatform) {
+        ctaEN.classList.add('hidden');
+        ctaBN.classList.add('hidden');
+    } else {
+        ctaEN.classList.remove('hidden');
+        ctaBN.classList.remove('hidden');
+    }
+  }
+
+  // --- Download Function ---
+  async function downloadVideoImage(lang) {
+    const bannerId = lang === 'english' ? 'bannerEN' : 'bannerBN';
+    const banner = document.getElementById(bannerId);
+    const selectedPlatform = document.getElementById('videoPlatformSelect').value;
+    const platformName = aspectRatioMap[selectedPlatform].name;
+
+    // Load html2canvas if not loaded
+    if (typeof html2canvas === 'undefined') {
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+    }
+
+    // High quality scale for all outputs
+    const scale = 3; 
+
+    // Generate image
+    html2canvas(banner, {
+      scale: scale, 
+      useCORS: true, 
+      allowTaint: true, 
+      backgroundColor: '#ffffff',
+      // Pass the current display width/height to html2canvas for accurate rendering
+      width: banner.offsetWidth, 
+      height: banner.offsetHeight,
+      logging: false
+    }).then(canvas => {
+      // User guidance for video creation
+      const alertMessage = `
+Your high-quality image (${platformName} format) is ready!
+
+To create a 30-second still video:
+1. Open the downloaded image in any video editing software (e.g., DaVinci Resolve, Adobe Premiere, CapCut, KineMaster, Filmora).
+2. Add the image to your timeline.
+3. Extend the image duration to 30 seconds.
+4. Export your video.
+
+Enjoy creating your video!
+      `;
+      alert(alertMessage);
+
+      // Download
+      const link = document.createElement('a');
+      link.download = `InfoMela_${lang}_${platformName}_VideoImage_${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png', 1.0);
+      link.click();
+    });
+  }
+
+  // --- Script Loader ---
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+</script>
+</body>
+</html>
