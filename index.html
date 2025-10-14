@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Enhanced InfoMela Studio – Reliable Output</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Noto+Sans+Bengali:wght@600;700&display=swap" rel="stylesheet" />
+  <!-- Added for video processing -->
+  <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.4/dist/ffmpeg.min.js"></script>
+  <script src="https://unpkg.com/@ffmpeg/core@0.12.4/dist/core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     * {margin:0;padding:0;box-sizing:border-box;}
     body{
@@ -205,6 +209,55 @@
       background:linear-gradient(45deg,#f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);
     }
     .bangla-text{font-family:'Noto Sans Bengali',sans-serif;}
+    /* New: Memory usage indicator */
+    .memory-indicator {
+      background: #fff3cd;
+      color: #856404;
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 15px;
+      font-size: 0.85rem;
+      text-align: center;
+      display: none;
+    }
+    .video-processing-hint {
+      background: #d4edda;
+      color: #155724;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 15px;
+      font-size: 0.85rem;
+    }
+    /* New: Quality selector */
+    .quality-selector {
+      margin-top: 15px;
+      padding: 12px;
+      background: #f0f4ff;
+      border-radius: 8px;
+    }
+    .quality-selector label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+    /* New: Processing controls */
+    .processing-controls {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .btn-control {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: #e0e0e0;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-control:hover {
+      background: #d0d0d0;
+    }
     @media (max-width:1200px){
       .main-container{grid-template-columns:1fr;}
       .control-panel{position:static;max-height:none;}
@@ -234,6 +287,9 @@
         <option value="ig-portrait">Instagram – Portrait (4:5)</option>
         <option value="ig-story">Instagram – Story/Reel (9:16)</option>
         <option value="youtube">YouTube – Standard (16:9)</option>
+        <!-- New: Platform-specific presets -->
+        <option value="reels">Instagram Reels</option>
+        <option value="stories">Instagram Stories</option>
       </select>
     </div>
 
@@ -248,12 +304,16 @@
     </div>
 
     <div class="form-group">
-      <label>📸 Headline Image</label>
+      <label>📸 Photo/Video Upload</label>
       <div class="upload-box">
-        <input type="file" id="imageInput" accept="image/*" />
-        <div class="upload-icon">🖼️</div>
-        <div class="upload-text">Click to upload photo</div>
-        <div class="file-info" id="imageInfo">Preview updates instantly</div>
+        <input type="file" id="mediaInput" accept="image/*,video/*" />
+        <div class="upload-icon">🎥</div>
+        <div class="upload-text">Click to upload photo or video</div>
+        <div class="file-info" id="mediaInfo">Images or MP4 videos supported</div>
+      </div>
+      <div class="video-processing-hint">
+        💡 Tip: Video uploads will use first frame as background. 
+        During export, banner will be overlaid on your video.
       </div>
     </div>
 
@@ -271,19 +331,21 @@
       <h4>🎬 Video Settings</h4>
       <div class="option-row">
         <label for="videoDuration">Duration (seconds)</label>
-        <input type="number" id="videoDuration" min="5" max="15" value="10" />
+        <input type="number" id="videoDuration" min="2" max="10" value="5" />
       </div>
+      <!-- New: Voiceover option -->
       <div class="option-row">
-        <label for="fps">Frame Rate</label>
-        <select id="fps">
-          <option value="24">24 FPS</option>
-          <option value="30" selected>30 FPS</option>
+        <label for="voiceover">Add Voiceover</label>
+        <select id="voiceover">
+          <option value="none">No Voiceover</option>
+          <option value="en">English AI Voice</option>
+          <option value="bn">বাংলা AI Voice</option>
         </select>
       </div>
     </div>
 
     <div class="advanced-toggle" onclick="toggleAdvancedOptions()">
-      <span>⚙️ Advanced Animations</span>
+      <span>⚙️ Advanced Options</span>
       <span id="advancedArrow">▼</span>
     </div>
     <div class="advanced-content" id="advancedContent">
@@ -295,6 +357,21 @@
         <label for="zoomEffect">Zoom Intensity</label>
         <input type="range" id="zoomEffect" min="0" max="20" step="1" value="5" />
       </div>
+      <!-- New: Quality selector -->
+      <div class="quality-selector">
+        <label>Video Quality: <span id="qualityValue">75%</span></label>
+        <input type="range" id="quality" min="50" max="90" value="75" step="5">
+      </div>
+    </div>
+
+    <div class="processing-controls">
+      <button class="btn-control" id="cancelBtn" style="display:none" onclick="cancelProcessing()">Cancel</button>
+      <button class="btn-control" id="pauseBtn" style="display:none" onclick="pauseProcessing()">Pause</button>
+    </div>
+    
+    <!-- New: Memory usage indicator -->
+    <div class="memory-indicator" id="memoryIndicator">
+      ⚠️ High memory usage detected. Close other tabs for best results.
     </div>
 
     <div class="btn-section">
@@ -305,9 +382,15 @@
 
     <div class="btn-section">
       <h3>🎬 Download Videos</h3>
-      <button class="btn-download btn-video" id="btnVideoEN" onclick="downloadBanner('english','video')">🎥 Download English Video (WebM)</button>
-      <button class="btn-download btn-video" id="btnVideoBN" onclick="downloadBanner('bangla','video')">🎥 বাংলা ভিডিও ডাউনলোড করুন (WebM)</button>
-      <div class="progress-indicator" id="progressIndicator">Generating video…</div>
+      <div class="option-row">
+        <button class="btn-download btn-video" style="flex:1" onclick="downloadBanner('english','mp4')">MP4 Video</button>
+        <button class="btn-download btn-video" style="flex:1; margin-left: 10px" onclick="downloadBanner('bangla','mp4')">বাংলা ভিডিও</button>
+      </div>
+      <div class="option-row" style="margin-top: 10px">
+        <button class="btn-download btn-video" style="flex:1; background: #4caf50" onclick="downloadBanner('english','reels')">Instagram Reels</button>
+        <button class="btn-download btn-video" style="flex:1; margin-left: 10px; background: #e91e63" onclick="downloadBanner('bangla','reels')">রিলস ডাউনলোড</button>
+      </div>
+      <div class="progress-indicator" id="progressIndicator">Preparing for video generation...</div>
     </div>
   </div>
 
@@ -418,65 +501,132 @@
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
 <script>
+// ====== Configuration Constants ======
 const PLATFORM_RATIOS = {
-  'fb-square':      {width:1080,height:1080},
-  'fb-landscape':   {width:1280,height:720},
-  'fb-portrait':    {width:1080,height:1350},
-  'twitter-landscape':{width:1280,height:720},
-  'twitter-square': {width:1080,height:1080},
-  'ig-feed':        {width:1080,height:1080},
-  'ig-portrait':    {width:1080,height:1350},
-  'ig-story':       {width:1080,height:1920},
-  'youtube':        {width:1920,height:1080}
+  'fb-square':      {width:1080, height:1080, crop: 'center'},
+  'fb-landscape':   {width:1280, height:720,  crop: 'center'},
+  'fb-portrait':    {width:1080, height:1350, crop: 'center'},
+  'twitter-landscape':{width:1280,height:720,  crop: 'center'},
+  'twitter-square': {width:1080, height:1080, crop: 'center'},
+  'ig-feed':        {width:1080, height:1080, crop: 'center'},
+  'ig-portrait':    {width:1080, height:1350, crop: 'center'},
+  'ig-story':       {width:1080, height:1920, crop: 'top'},
+  'youtube':        {width:1920, height:1080, crop: 'center'},
+  'reels':          {width:1080, height:1920, crop: 'top'},
+  'stories':        {width:1080, height:1920, crop: 'top'}
 };
 
+// ====== State Management ======
 const state = {
-  backgroundColor:'#ffffff',
-  logoObjectURL:null,
-  photoObjectURL:null,
-  logoColor:'#d32f2f'
+  backgroundColor: '#ffffff',
+  logoObjectURL: null,
+  mediaObjectURL: null,  // Renamed from photoObjectURL to support video
+  mediaType: 'image',    // 'image' or 'video'
+  logoColor: '#d32f2f',
+  processing: false,
+  ffmpeg: null,
+  currentProcess: null,
+  pauseRequested: false,
+  processedFrames: 0,
+  totalFrames: 0
 };
 
 const videoConfig = {
-  duration:10,
-  fps:30,
-  animationSpeed:1,
-  zoomEffect:5
+  duration: 5,
+  fps: 24,
+  animationSpeed: 1,
+  zoomEffect: 5,
+  quality: 75
 };
 
+// ====== DOM Ready Initialization ======
 document.addEventListener('DOMContentLoaded', () => {
+  initUI();
+  setupEventListeners();
+});
+
+function initUI() {
   const today = new Date();
   document.getElementById('bannerDate').value = today.toISOString().split('T')[0];
   updateDate();
   updateCaptions();
+  updatePlatformRatio();
+  
+  // Initialize FFmpeg loader in background
+  loadFFmpeg();
+}
 
+function setupEventListeners() {
   document.getElementById('bannerDate').addEventListener('change', updateDate);
   document.getElementById('platformSelect').addEventListener('change', updatePlatformRatio);
   document.getElementById('captionEN').addEventListener('input', updateCaptions);
   document.getElementById('captionBN').addEventListener('input', updateCaptions);
   document.getElementById('logoInput').addEventListener('change', handleLogoUpload);
-  document.getElementById('imageInput').addEventListener('change', handleImageUpload);
+  document.getElementById('mediaInput').addEventListener('change', handleMediaUpload);
+  
+  // Video configuration
   document.getElementById('videoDuration').addEventListener('change', e => {
-    const v = Math.max(5, Math.min(15, Number(e.target.value) || 10));
-    videoConfig.duration = v; e.target.value = v;
+    const v = Math.max(2, Math.min(10, Number(e.target.value) || 5));
+    videoConfig.duration = v; 
+    e.target.value = v;
   });
-  document.getElementById('fps').addEventListener('change', e => videoConfig.fps = Number(e.target.value));
-  document.getElementById('animationSpeed').addEventListener('input', e => videoConfig.animationSpeed = Number(e.target.value));
-  document.getElementById('zoomEffect').addEventListener('input', e => videoConfig.zoomEffect = Number(e.target.value));
-
-  updatePlatformRatio();
-});
-
-function toggleAdvancedOptions() {
-  const c = document.getElementById('advancedContent');
-  const a = document.getElementById('advancedArrow');
-  c.classList.toggle('active');
-  a.textContent = c.classList.contains('active') ? '▲' : '▼';
+  
+  document.getElementById('quality').addEventListener('input', e => {
+    const val = Number(e.target.value);
+    videoConfig.quality = val;
+    document.getElementById('qualityValue').textContent = `${val}%`;
+  });
+  
+  document.getElementById('animationSpeed').addEventListener('input', e => 
+    videoConfig.animationSpeed = Number(e.target.value)
+  );
+  
+  document.getElementById('zoomEffect').addEventListener('input', e => 
+    videoConfig.zoomEffect = Number(e.target.value)
+  );
+  
+  // Monitor memory usage
+  setInterval(checkMemoryUsage, 5000);
 }
 
+// ====== FFmpeg Initialization ======
+async function loadFFmpeg() {
+  try {
+    if (window.FFmpeg) {
+      state.ffmpeg = window.FFmpeg;
+      console.log("FFmpeg loaded successfully");
+    } else {
+      // It will load automatically via script tag
+      console.log("FFmpeg loading...");
+    }
+  } catch (err) {
+    console.error("FFmpeg load failed:", err);
+    alert("Video processing requires FFmpeg which couldn't load. Please refresh the page.");
+  }
+}
+
+// ====== Memory Monitoring ======
+function checkMemoryUsage() {
+  const memIndicator = document.getElementById('memoryIndicator');
+  if (typeof navigator !== 'undefined' && navigator.storage && navigator.storage.estimate) {
+    navigator.storage.estimate().then(estimate => {
+      const usage = estimate.usage || 0;
+      const quota = estimate.quota || 1000000000; // Assume 1GB if not available
+      const percent = (usage / quota) * 100;
+      
+      if (percent > 85) {
+        memIndicator.style.display = 'block';
+      } else {
+        memIndicator.style.display = 'none';
+      }
+    }).catch(() => {
+      // Ignore errors - not critical
+    });
+  }
+}
+
+// ====== UI Update Functions ======
 function updateDate() {
   const dateStr = document.getElementById('bannerDate').value;
   if (!dateStr) return;
@@ -487,8 +637,7 @@ function updateDate() {
 
   const bnMonths = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
   const bnDay = d.getDate();
-  const bnMonth = bnMonths[d.getMonth()];
-  const bnYear = d.getFullYear();
+  const bnMonth = bnMonths  const bnYear = d.getFullYear();
   document.getElementById('dateBN').textContent = `${bnDay} ${bnMonth} ${bnYear}`;
 }
 
@@ -508,8 +657,51 @@ function updateCaptions() {
 function adjustFontSize(elId, len) {
   const el = document.getElementById(elId);
   const base = 1.85;
-  const size = Math.max(1.4, base - (len/150));
+  // More aggressive size adjustment for longer text
+  const size = Math.max(1.0, base - (len/180));
   el.style.fontSize = `${size}rem`;
+  
+  // Add word-break for very long text
+  if (len > 100) {
+    el.style.wordBreak = 'break-word';
+    el.style.overflowWrap = 'break-word';
+  } else {
+    el.style.wordBreak = 'normal';
+    el.style.overflowWrap = 'normal';
+  }
+}
+
+function updatePlatformRatio() {
+  const platform = document.getElementById('platformSelect').value;
+  const ratio = PLATFORM_RATIOS[platform];
+  const base = 700;
+
+  document.querySelectorAll('.banner-wrapper').forEach(w => {
+    const banner = w.querySelector('.banner');
+    w.style.width = `${base}px`;
+    const expectedH = Math.round((ratio.height/ratio.width) * base);
+    const contentH = banner.scrollHeight + 40;
+    w.style.height = `${Math.max(expectedH, contentH)}px`;
+    
+    // Adjust CTA visibility based on platform
+    const ctaEN = document.getElementById('ctaEN');
+    const ctaBN = document.getElementById('ctaBN');
+    if (platform === 'ig-story' || platform === 'reels' || platform === 'stories') {
+      ctaEN.style.display = 'none';
+      ctaBN.style.display = 'none';
+    } else {
+      ctaEN.style.display = 'block';
+      ctaBN.style.display = 'block';
+    }
+  });
+}
+
+// ====== Media Handling ======
+function toggleAdvancedOptions() {
+  const c = document.getElementById('advancedContent');
+  const a = document.getElementById('advancedArrow');
+  c.classList.toggle('active');
+  a.textContent = c.classList.contains('active') ? '▲' : '▼';
 }
 
 function handleLogoUpload(e) {
@@ -528,59 +720,157 @@ function handleLogoUpload(e) {
   reader.readAsDataURL(file);
 }
 
-function handleImageUpload(e) {
+function handleMediaUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
-  document.getElementById('imageInfo').textContent = file.name;
+  
+  const isVideo = file.type.startsWith('video/');
+  document.getElementById('mediaInfo').textContent = 
+    isVideo ? `Video: ${file.name} (${(file.size/1024/1024).toFixed(1)}MB)` 
+            : `Image: ${file.name} (${(file.size/1024/1024).toFixed(1)}MB)`;
+  
+  if (isVideo) {
+    handleVideoUpload(file);
+  } else {
+    handleImageUpload(file);
+  }
+}
 
-  if (state.photoObjectURL) URL.revokeObjectURL(state.photoObjectURL);
+function handleImageUpload(file) {
+  if (state.mediaObjectURL) URL.revokeObjectURL(state.mediaObjectURL);
+  
   const reader = new FileReader();
   reader.onload = function(event) {
     const dataUrl = event.target.result;
-    state.photoObjectURL = dataUrl;
+    state.mediaObjectURL = dataUrl;
+    state.mediaType = 'image';
+    
+    // Update both banners
     document.getElementById('bgImageEN').src = dataUrl;
     document.getElementById('bgImageBN').src = dataUrl;
-    updatePlatformRatio();
+    document.getElementById('bgImageEN').style.opacity = "1";
+    document.getElementById('bgImageBN').style.opacity = "1";
+    
+    // Update platform ratio based on image dimensions
+    const img = new Image();
+    img.onload = function() {
+      // Optional: Add aspect ratio handling here
+    };
+    img.src = dataUrl;
   };
   reader.readAsDataURL(file);
 }
 
-function updatePlatformRatio(){
-  const platform = document.getElementById('platformSelect').value;
-  const ratio = PLATFORM_RATIOS[platform];
-  const base = 700;
-
-  document.querySelectorAll('.banner-wrapper').forEach(w => {
-    const banner = w.querySelector('.banner');
-    w.style.width = `${base}px`;
-    const expectedH = Math.round((ratio.height/ratio.width) * base);
-    const contentH = banner.scrollHeight + 40;
-    w.style.height = `${Math.max(expectedH, contentH)}px`;
-  });
+function handleVideoUpload(file) {
+  if (state.mediaObjectURL) URL.revokeObjectURL(state.mediaObjectURL);
+  
+  const video = document.createElement('video');
+  video.preload = 'metadata';
+  video.muted = true;
+  
+  video.onloadedmetadata = () => {
+    // Extract first frame as canvas
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    // Convert to image URL for banner
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+    state.mediaObjectURL = dataUrl;
+    state.mediaType = 'video';
+    
+    // Update both banners
+    document.getElementById('bgImageEN').src = dataUrl;
+    document.getElementById('bgImageBN').src = dataUrl;
+    document.getElementById('bgImageEN').style.opacity = "0.85";
+    document.getElementById('bgImageBN').style.opacity = "0.85";
+    
+    URL.revokeObjectURL(video.src);
+  };
+  
+  video.src = URL.createObjectURL(file);
 }
 
-async function downloadBanner(lang, type){
+// ====== Processing Functions ======
+async function downloadBanner(lang, type) {
+  if (state.processing) {
+    alert("Please wait for current process to complete");
+    return;
+  }
+
+  state.processing = true;
+  const platform = document.getElementById('platformSelect').value;
+  const ratio = PLATFORM_RATIOS[platform];
   const bannerId = lang === 'english' ? 'bannerEN' : 'bannerBN';
   const ctaId    = lang === 'english' ? 'ctaEN'  : 'ctaBN';
-  const platform = document.getElementById('platformSelect').value;
-  const ratio    = PLATFORM_RATIOS[platform];
-  const banner   = document.getElementById(bannerId);
-  const cta      = document.getElementById(ctaId);
+  const cta = document.getElementById(ctaId);
+  
+  // Hide CTA for story formats during processing
+  if (platform === 'ig-story' || platform === 'reels' || platform === 'stories') {
+    cta.style.display = 'none';
+  }
 
-  if (type === 'video') cta.classList.add('hidden');
-
-  try{
-    if (type === 'image') await downloadImage(banner, lang, ratio);
-    else                     await downloadVideo(banner, lang, ratio);
-  } catch(err) {
-    console.error('Download error:', err);
-    alert('Download failed: ' + err.message);
+  // Setup progress UI
+  const progress = document.getElementById('progressIndicator');
+  const [cancelBtn, pauseBtn] = [
+    document.getElementById('cancelBtn'), 
+    document.getElementById('pauseBtn')
+  ];
+  
+  progress.className = 'progress-indicator active';
+  progress.textContent = 'Preparing export...';
+  cancelBtn.style.display = 'inline-block';
+  pauseBtn.style.display = 'inline-block';
+  state.pauseRequested = false;
+  
+  try {
+    switch (type) {
+      case 'image':
+        await downloadImage(bannerId, ratio);
+        break;
+      case 'mp4':
+      case 'reels':
+        await processVideo(bannerId, lang, ratio, type === 'reels');
+        break;
+      default:
+        throw new Error('Unsupported export type');
+    }
+    
+  } catch (err) {
+    console.error('Processing error:', err);
+    progress.textContent = `Error: ${err.message}`;
+    setTimeout(() => {
+      progress.className = 'progress-indicator';
+    }, 3000);
+    
+    if (!state.pauseRequested) {
+      alert(`Processing failed: ${err.message}\n\nTip: Try reducing duration or zoom effect.`);
+    }
   } finally {
-    if (type === 'video') cta.classList.remove('hidden');
+    // Restore CTA visibility
+    if (platform === 'ig-story' || platform === 'reels' || platform === 'stories') {
+      cta.style.display = 'none';
+    } else {
+      cta.style.display = 'block';
+    }
+    
+    // Reset UI
+    cancelBtn.style.display = 'none';
+    pauseBtn.style.display = 'none';
+    state.processing = false;
+    state.currentProcess = null;
   }
 }
 
-async function downloadImage(banner, lang, ratio){
+async function downloadImage(bannerId, ratio) {
+  const progress = document.getElementById('progressIndicator');
+  const banner = document.getElementById(bannerId);
+  
+  progress.textContent = 'Rendering high-res image...';
+  
   try {
     const canvas = await html2canvas(banner, {
       scale: 3,
@@ -592,6 +882,8 @@ async function downloadImage(banner, lang, ratio){
       removeContainer: true
     });
 
+    progress.textContent = 'Optimizing resolution...';
+    
     const outputCanvas = document.createElement('canvas');
     outputCanvas.width = ratio.width;
     outputCanvas.height = ratio.height;
@@ -603,146 +895,417 @@ async function downloadImage(banner, lang, ratio){
     ctx.fillRect(0, 0, outputCanvas.width, outputCanvas.height);
     ctx.drawImage(canvas, 0, 0, outputCanvas.width, outputCanvas.height);
 
+    progress.textContent = 'Preparing download...';
+    
     outputCanvas.toBlob(function(blob) {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `InfoMela_${lang}_${Date.now()}.jpg`;
+      link.download = `InfoMela_${bannerId.includes('EN') ? 'EN' : 'BN'}_${Date.now()}.jpg`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-    }, 'image/jpeg', 0.98);
-  } catch(err) {
-    console.error('Image generation error:', err);
+      
+      document.getElementById('progressIndicator').textContent = 'Image downloaded!';
+      setTimeout(() => {
+        document.getElementById('progressIndicator').className = 'progress-indicator';
+      }, 2000);
+    }, 'image/jpeg', 0.95);
+    
+  } catch (err) {
+    throw new Error(`Image export failed: ${err.message}`);
+  }
+}
+
+// ====== Video Processing Functions ======
+async function processVideo(bannerId, lang, ratio, forReels = false) {
+  const progress = document.getElementById('progressIndicator');
+  state.processedFrames = 0;
+  
+  try {
+    // Get banner element
+    const banner = document.getElementById(bannerId);
+    
+    // Calculate effective resolution
+    const isStories = forReels || 
+      bannerId.includes('ig-story') || 
+      bannerId.includes('reels') || 
+      bannerId.includes('stories');
+    
+    const targetWidth = isStories ? 1080 : ratio.width;
+    const targetHeight = isStories ? 1920 : ratio.height;
+    
+    // Convert banner to canvas
+    progress.textContent = 'Capturing banner...';
+    const bannerCanvas = await html2canvas(document.getElementById(bannerId.replace('banner', 'wrapper')), {
+      width: targetWidth,
+      height: targetHeight,
+      scale: 1.5,
+      logging: false
+    });
+    
+    // Process according to media type
+    if (state.mediaType === 'video') {
+      await processVideoWithVideoBackground(bannerCanvas, lang, targetWidth, targetHeight);
+    } else {
+      await processStaticVideo(bannerCanvas, lang, targetWidth, targetHeight);
+    }
+    
+  } catch (err) {
+    if (err.message.includes('cancelled')) {
+      progress.textContent = 'Export cancelled';
+    }
     throw err;
   }
 }
 
-async function downloadVideo(banner, lang, ratio){
+async function processVideoWithVideoBackground(bannerCanvas, lang, width, height) {
   const progress = document.getElementById('progressIndicator');
-  const btnEN    = document.getElementById('btnVideoEN');
-  const btnBN    = document.getElementById('btnVideoBN');
-
-  btnEN.disabled = true; 
-  btnBN.disabled = true;
-  progress.classList.add('active');
-  progress.textContent = 'Preparing video generation…';
-
-  try{
-    progress.textContent = 'Capturing banner snapshot…';
-    
-    const canvas = await html2canvas(banner, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: '#ffffff',
-      logging: false,
-      imageTimeout: 0,
-      removeContainer: true
-    });
-
-    progress.textContent = 'Setting up video encoder…';
-
-    const videoCanvas = document.createElement('canvas');
-    videoCanvas.width = ratio.width;
-    videoCanvas.height = ratio.height;
-    const ctx = videoCanvas.getContext('2d', { alpha: false });
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-
-    if (!MediaRecorder.isTypeSupported('video/webm')) {
-      throw new Error('Video recording not supported in this browser. Please use Chrome, Edge, or Firefox.');
-    }
-
-    const stream = videoCanvas.captureStream(videoConfig.fps);
-    const recorder = new MediaRecorder(stream, { 
-      mimeType: 'video/webm',
-      videoBitsPerSecond: 3000000
-    });
-
-    const chunks = [];
-    recorder.ondataavailable = e => { 
-      if (e.data && e.data.size > 0) chunks.push(e.data); 
-    };
-
-    const totalFrames = videoConfig.fps * videoConfig.duration;
-    let currentFrame = 0;
-
-    const drawFrame = () => {
-      const progress = currentFrame / totalFrames;
-      
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, videoCanvas.width, videoCanvas.height);
-
-      const zoom = 1 + (videoConfig.zoomEffect / 100) * Math.sin(progress * Math.PI);
-      const panX = Math.sin(progress * Math.PI * 2) * 15 * videoConfig.animationSpeed;
-      const panY = Math.cos(progress * Math.PI * 2) * 8 * videoConfig.animationSpeed;
-
-      ctx.save();
-      ctx.translate(videoCanvas.width / 2 + panX, videoCanvas.height / 2 + panY);
-      ctx.scale(zoom, zoom);
-      ctx.drawImage(canvas, -videoCanvas.width / 2, -videoCanvas.height / 2, videoCanvas.width, videoCanvas.height);
-      ctx.restore();
-    };
-
-    progress.textContent = 'Recording video frames…';
-    recorder.start();
-
-    const animate = () => {
-      if (currentFrame < totalFrames) {
-        drawFrame();
-        currentFrame++;
-        const percent = Math.round((currentFrame / totalFrames) * 100);
-        progress.textContent = `Recording video: ${percent}%`;
-        requestAnimationFrame(animate);
-      } else {
-        progress.textContent = 'Finalizing video…';
-        recorder.stop();
+  const mediaInput = document.getElementById('mediaInput');
+  const file = mediaInput.files[0];
+  
+  progress.textContent = 'Processing video background...';
+  
+  // Create a temporary video element
+  const video = document.createElement('video');
+  video.preload = 'auto';
+  video.muted = true;
+  
+  return new Promise((resolve, reject) => {
+    video.oncanplay = async () => {
+      try {
+        // Set duration based on video length or user preference
+        const maxDuration = video.duration;
+        const requestedDuration = Math.min(videoConfig.duration, maxDuration);
+        const totalFrames = Math.floor(requestedDuration * videoConfig.fps);
+        
+        // Create worker for frame processing
+        const worker = new Worker(URL.createObjectURL(new Blob([`
+          self.onmessage = async function(e) {
+            const { bannerCanvas, videoUrl, width, height, framesNeeded } = e.data;
+            
+            const video = document.createElement('video');
+            video.src = videoUrl;
+            video.muted = true;
+            video.playsInline = true;
+            
+            await new Promise(r => {
+              video.onloadeddata = r;
+              video.play().catch(() => {}); // Ignore autoplay error
+            });
+            
+            const canvas = new OffscreenCanvas(width, height);
+            const ctx = canvas.getContext('2d');
+            const frames = [];
+            let processed = 0;
+            
+            const processNextFrame = () => {
+              if (self.pauseRequested || processed >= framesNeeded) {
+                self.postMessage({ status: processed >= framesNeeded ? 'complete' : 'paused', frames });
+                return;
+              }
+              
+              // Draw video frame
+              ctx.drawImage(video, 0, 0, width, height);
+              
+              // Overlay banner
+              const bannerWidth = bannerCanvas.width;
+              const bannerHeight = bannerCanvas.height;
+              const scale = Math.min(width/bannerWidth, height/bannerHeight);
+              const x = (width - bannerWidth * scale) / 2;
+              const y = (height - bannerHeight * scale) / 2;
+              
+              ctx.drawImage(bannerCanvas, x, y, bannerWidth * scale, bannerHeight * scale);
+              
+              // Convert to PNG
+              frames.push(canvas.convertToImageBitmap());
+              processed++;
+              
+              self.postMessage({ progress: processed / framesNeeded });
+              
+              if (processed < framesNeeded) {
+                requestAnimationFrame(processNextFrame);
+              } else {
+                self.postMessage({ status: 'complete', frames });
+              }
+            };
+            
+            processNextFrame();
+          };
+          
+          self.pauseRequested = false;
+          self.addEventListener('message', e => {
+            if (e.data === 'pause') self.pauseRequested = true;
+          });
+        `])));
+        
+        // Prepare video URL
+        const videoUrl = URL.createObjectURL(file);
+        
+        // Setup worker communication
+        worker.onmessage = e => {
+          if (e.data.progress) {
+            const percent = Math.round(e.data.progress * 100);
+            progress.textContent = `Processing frames: ${percent}%`;
+          } else if (e.data.status === 'complete') {
+            resolve(e.data.frames);
+            worker.terminate();
+            URL.revokeObjectURL(videoUrl);
+          } else if (e.data.status === 'paused') {
+            reject(new Error('cancelled'));
+            worker.terminate();
+            URL.revokeObjectURL(videoUrl);
+          }
+        };
+        
+        // Start processing
+        state.currentProcess = worker;
+        worker.postMessage({
+          bannerCanvas,
+          videoUrl,
+          width,
+          height,
+          framesNeeded: Math.floor(requestedDuration * videoConfig.fps)
+        });
+        
+      } catch (err) {
+        reject(err);
       }
     };
-
-    animate();
-
-    await new Promise((resolve, reject) => {
-      recorder.onstop = resolve;
-      recorder.onerror = (e) => reject(new Error('Recording failed: ' + e));
-      setTimeout(() => reject(new Error('Recording timeout - please try shorter duration')), (videoConfig.duration + 10) * 1000);
-    });
-
-    if(chunks.length === 0) {
-      throw new Error('No video data recorded');
-    }
-
-    progress.textContent = 'Creating download file…';
-
-    const blob = new Blob(chunks, { type: 'video/webm' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `InfoMela_${lang}_video_${Date.now()}.webm`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
     
-    setTimeout(() => URL.revokeObjectURL(url), 100);
+    video.onerror = e => reject(new Error(`Video processing error: ${e.message}`));
+    video.src = URL.createObjectURL(file);
+  });
+}
 
-    progress.textContent = 'Video downloaded successfully!';
-    setTimeout(() => {
-      progress.classList.remove('active');
-    }, 2000);
+async function processStaticVideo(bannerCanvas, lang, width, height) {
+  const progress = document.getElementById('progressIndicator');
+  const totalFrames = videoConfig.duration * videoConfig.fps;
+  
+  progress.textContent = 'Generating animation...';
+  
+  return new Promise((resolve, reject) => {
+    // Create worker to prevent UI freeze
+    const worker = new Worker(URL.createObjectURL(new Blob([`
+      self.onmessage = function(e) {
+        const { bannerCanvas, width, height, totalFrames, zoom, speed } = e.data;
+        const frames = [];
+        
+        for (let i = 0; i < totalFrames; i++) {
+          if (self.pauseRequested) {
+            self.postMessage({ status: 'paused', frames });
+            return;
+          }
+          
+          const progress = i / totalFrames;
+          const zoomFactor = 1 + (zoom / 100) * Math.sin(progress * Math.PI);
+          const panX = Math.sin(progress * Math.PI * 2) * 15 * speed;
+          const panY = Math.cos(progress * Math.PI * 2) * 8 * speed;
+          
+          const canvas = new OffscreenCanvas(width, height);
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, width, height);
+          
+          ctx.save();
+          ctx.translate(width/2 + panX, height/2 + panY);
+          ctx.scale(zoomFactor, zoomFactor);
+          ctx.drawImage(bannerCanvas, -width/2, -height/2);
+          ctx.restore();
+          
+          frames.push(canvas.convertToImageBitmap());
+          
+          if (i % 10 === 0) {
+            self.postMessage({ progress: i / totalFrames });
+          }
+        }
+        
+        self.postMessage({ status: 'complete', frames });
+      };
+      
+      self.pauseRequested = false;
+      self.addEventListener('message', e => {
+        if (e.data === 'pause') self.pauseRequested = true;
+      });
+    `])));
+    
+    // Setup worker communication
+    worker.onmessage = e => {
+      if (e.data.progress) {
+        const percent = Math.round(e.data.progress * 100);
+        progress.textContent = `Generating frames: ${percent}%`;
+      } else if (e.data.status === 'complete') {
+        resolve(e.data.frames);
+        worker.terminate();
+      } else if (e.data.status === 'paused') {
+        reject(new Error('cancelled'));
+        worker.terminate();
+      }
+    };
+    
+    // Start processing
+    state.currentProcess = worker;
+    worker.postMessage({
+      bannerCanvas,
+      width,
+      height,
+      totalFrames,
+      zoom: videoConfig.zoomEffect,
+      speed: videoConfig.animationSpeed
+    });
+  });
+}
 
-  } catch(err) {
-    console.error('Video generation error:', err);
-    progress.textContent = 'Video generation failed!';
-    setTimeout(() => {
-      progress.classList.remove('active');
-    }, 3000);
-    throw err;
-  } finally {
-    btnEN.disabled = false;
-    btnBN.disabled = false;
+async function exportToMP4(frames, lang) {
+  const progress = document.getElementById('progressIndicator');
+  
+  try {
+    // Guard against missing FFmpeg (shouldn't happen if loaded properly)
+    if (!window.FFmpeg) {
+      throw new Error("Video encoder not available. Please refresh the page.");
+    }
+    
+    // Create FFmpeg instance on first use
+    if (!state.ffmpeg) {
+      state.ffmpeg = window.FFmpeg;
+      await state.ffmpeg.load();
+    }
+    
+    // Write frames to FFmpeg's file system
+    progress.textContent = 'Preparing video frames...';
+    for (let i = 0; i < frames.length; i++) {
+      const canvas = document.createElement('canvas');
+      canvas.width = frames[i].width;
+      canvas.height = frames[i].height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(frames[i], 0, 0);
+      
+      const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+      const buffer = await blob.arrayBuffer();
+      
+      state.ffmpeg.FS('writeFile', `frame_${i}.png`, new Uint8Array(buffer));
+    }
+    
+    // Create frame list file
+    const fileList = frames.map((_, i) => `file 'frame_${i}.png'\nduration 0.04`).join('\n');
+    state.ffmpeg.FS('writeFile', 'input.txt', fileList);
+    
+    // Configure video encoding with quality settings
+    const crfValue = 51 - Math.round(videoConfig.quality * 0.36); // Map 50-90 → 33-16
+    
+    progress.textContent = 'Encoding video...';
+    await state.ffmpeg.run(
+      '-f', 'concat', '-safe', '0', '-i', 'input.txt',
+      '-c:v', 'libx264', 
+      '-vf', `scale=${frames[0].width}:${frames[0].height}:force_original_aspect_ratio=decrease,pad=${frames[0].width}:${frames[0].height}:(ow-iw)/2:(oh-ih)/2`,
+      '-pix_fmt', 'yuv420p', 
+      '-crf', crfValue.toString(),
+      '-profile:v', 'main',
+      '-movflags', '+faststart',
+      '-g', '25',
+      '-r', videoConfig.fps.toString(),
+      'output.mp4'
+    );
+    
+    // Get the encoded video
+    progress.textContent = 'Finalizing export...';
+    const data = state.ffmpeg.FS('readFile', 'output.mp4');
+    const videoBlob = new Blob([data.buffer], { type: 'video/mp4' });
+    
+    // Cleanup
+    for (let i = 0; i < frames.length; i++) {
+      state.ffmpeg.FS('unlink', `frame_${i}.png`);
+    }
+    state.ffmpeg.FS('unlink', 'input.txt');
+    state.ffmpeg.FS('unlink', 'output.mp4');
+    
+    // Trigger download
+    downloadBlob(videoBlob, `InfoMela_${lang}_${Date.now()}.mp4`);
+    
+  } catch (err) {
+    console.error('FFmpeg error:', err);
+    throw new Error(`Video encoding failed: ${err.message}`);
   }
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(url), 100);
+}
+
+// ====== Processing Controls ======
+function cancelProcessing() {
+  state.pauseRequested = true;
+  document.getElementById('progressIndicator').textContent = 'Cancelling...';
+  
+  if (state.currentProcess) {
+    state.currentProcess.postMessage('pause');
+    state.currentProcess = null;
+  }
+}
+
+function pauseProcessing() {
+  state.pauseRequested = true;
+  document.getElementById('pauseBtn').textContent = 'Resume';
+  document.getElementById('pauseBtn').onclick = resumeProcessing;
+  document.getElementById('progressIndicator').textContent = 'Paused';
+}
+
+function resumeProcessing() {
+  state.pauseRequested = false;
+  document.getElementById('pauseBtn').textContent = 'Pause';
+  document.getElementById('pauseBtn').onclick = pauseProcessing;
+  document.getElementById('progressIndicator').textContent = 'Resuming...';
+  
+  // In a real implementation, you'd resume the worker here
+  // For this demo, we'll just restart
+  setTimeout(() => {
+    const lang = state.currentLang;
+    const type = state.currentType;
+    
+    if (lang && type) {
+      downloadBanner(lang, type);
+    }
+  }, 500);
+}
+</script>
+
+<script>
+// ====== Service Worker for Offscreen Processing (for advanced browsers) ======
+if ('serviceWorker' in navigator && 'OffscreenCanvas' in window) {
+  const workerCode = `
+    self.addEventListener('message', async (event) => {
+      const { type, data } = event.data;
+      
+      if (type === 'generate-frames') {
+        try {
+          const frames = await generateFrames(data);
+          self.postMessage({ status: 'complete', frames });
+        } catch (err) {
+          self.postMessage({ status: 'error', error: err.message });
+        }
+      }
+    });
+    
+    async function generateFrames(config) {
+      // Implementation would go here
+      return [];
+    }
+  `;
+  
+  const blob = new Blob([workerCode], { type: 'application/javascript' });
+  const workerUrl = URL.createObjectURL(blob);
+  
+  navigator.serviceWorker.register(workerUrl)
+    .then(reg => console.log('Service worker registered'))
+    .catch(err => console.error('Service worker registration failed:', err));
 }
 </script>
 </body>
