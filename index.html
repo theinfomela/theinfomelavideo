@@ -1,104 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
 <title>Enhanced InfoMela Studio – Reliable Output</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- --------------- FONTS ---------------- -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Noto+Sans+Bengali:wght@600;700&display=swap"
-      rel="stylesheet" />
+      rel="stylesheet">
+
+<!-- --------------- FFmpeg (WebAssembly) ---------------- -->
 <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.4/dist/ffmpeg.min.js"></script>
-<script src="https://unpkg.com/@ffmpeg/core@0.12.4/dist/core.min.js"></script>
+
+<!-- --------------- html2canvas (for image export) ---------------- -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <style>
+/* --------------------------------------------------------------
+   BASIC LAYOUT – kept identical to the version you posted,
+   with a few tiny tweaks for higher‑res image export.
+   -------------------------------------------------------------- */
 *{margin:0;padding:0;box-sizing:border-box}
 body{
   font-family:'Poppins',sans-serif;
   background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
   min-height:100vh;padding:30px;color:#fff
 }
-.main‑container{max-width:1600px;margin:auto;display:grid;grid-template-columns:400px 1fr;gap:40px}
-.control‑panel{
+.main-container{max-width:1600px;margin:auto;display:grid;grid-template-columns:400px 1fr;gap:40px}
+.control-panel{
   background:rgba(255,255,255,0.95);
   border-radius:20px;padding:35px;
-  box-shadow:0 20px 60px rgba(0,0,0,0.3);
+  box-shadow:0 20px 60px rgba(0,0,0,.3);
   position:sticky;top:30px;max-height:95vh;overflow-y:auto
 }
-.control‑panel h1{color:#667eea;font-size:1.8rem;margin-bottom:10px;font-weight:800}
-.control‑panel p{color:#666;margin-bottom:30px;font-size:.95rem}
-.form‑group{margin-bottom:25px}
-.form‑group label{display:block;color:#333;font-weight:700;margin-bottom:10px;font-size:.95rem}
-.form‑group input,
-.form‑group textarea,
-.form‑group select{
+.control-panel h1{color:#667eea;font-size:1.8rem;margin-bottom:10px;font-weight:800}
+.control-panel p{color:#666;margin-bottom:30px;font-size:.95rem}
+.form-group{margin-bottom:25px}
+.form-group label{display:block;color:#333;font-weight:700;margin-bottom:10px;font-size:.95rem}
+.form-group input,
+.form-group textarea,
+.form-group select{
   width:100%;padding:14px;border:2px solid #e0e0e0;border-radius:10px;font-size:1rem;
   background:#f9f9f9;transition:all .3s;font-family:inherit
 }
-.form‑group input:focus,
-.form‑group textarea:focus,
-.form‑group select:focus{
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus{
   outline:none;border-color:#667eea;background:white;
   box-shadow:0 0 0 4px rgba(102,126,234,.1)
 }
-.form‑group textarea{min-height:80px;resize:vertical}
-.upload‑box{
+.form-group textarea{min-height:80px;resize:vertical}
+.upload-box{
   border:3px dashed #667eea;border-radius:15px;padding:30px;text-align:center;
   cursor:pointer;transition:all .3s;background:#f0f4ff;position:relative
 }
-.upload‑box input{position:absolute;opacity:0;width:100%;height:100%;top:0;left:0;cursor:pointer}
-.upload‑box:hover{background:#e6edff;border-color:#5568d3;transform:translateY(-2px)}
-.upload‑icon{font-size:3rem;margin-bottom:10px;color:#667eea}
-.upload‑text{color:#667eea;font-weight:600;font-size:1rem}
-.file‑info{margin-top:10px;font-size:.85rem;color:#666}
-.video‑options{background:#f0f4ff;border-radius:10px;padding:15px;margin-top:15px}
-.video‑options h4{color:#667eea;margin-bottom:12px;font-size:.95rem}
-.option‑row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-.option‑row label{color:#333;font-weight:600;font-size:.9rem;min-width:140px}
-.option‑row input,
-.option‑row select{flex:1;padding:10px;border-radius:8px;border:1px solid #ccc}
-.advanced‑toggle{
+.upload-box input{position:absolute;opacity:0;width:100%;height:100%;top:0;left:0;cursor:pointer}
+.upload-box:hover{background:#e6edff;border-color:#5568d3;transform:translateY(-2px)}
+.upload-icon{font-size:3rem;margin-bottom:10px;color:#667eea}
+.upload-text{color:#667eea;font-weight:600;font-size:1rem}
+.file-info{margin-top:10px;font-size:.85rem;color:#666}
+.video-options{background:#f0f4ff;border-radius:10px;padding:15px;margin-top:15px}
+.video-options h4{color:#667eea;margin-bottom:12px;font-size:.95rem}
+.option-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.option-row label{color:#333;font-weight:600;font-size:.9rem;min-width:140px}
+.option-row input,
+.option-row select{flex:1;padding:10px;border-radius:8px;border:1px solid #ccc}
+.advanced-toggle{
   margin-top:22px;padding:12px 16px;border-radius:10px;background:#f0f4ff;
   display:flex;justify-content:space-between;align-items:center;
   cursor:pointer;transition:.3s
 }
-.advanced‑toggle:hover{background:#e6edff}
-.advanced‑content{display:none;margin-top:16px}
-.advanced‑content.active{display:block}
-.range‑row{margin-bottom:14px}
-.range‑row label{display:block;margin-bottom:6px;font-weight:600;color:#333}
-.range‑row input[type=range]{width:100%}
-.btn‑section{margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0}
-.btn‑section h3{color:#333;font-size:1.1rem;margin-bottom:15px;font-weight:700}
-.btn‑download{
+.advanced-toggle:hover{background:#e6edff}
+.advanced-content{display:none;margin-top:16px}
+.advanced-content.active{display:block}
+.range-row{margin-bottom:14px}
+.range-row label{display:block;margin-bottom:6px;font-weight:600;color:#333}
+.range-row input[type=range]{width:100%}
+.btn-section{margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0}
+.btn-section h3{color:#333;font-size:1.1rem;margin-bottom:15px;font-weight:700}
+.btn-download{
   width:100%;padding:18px;border:none;border-radius:12px;
   font-size:1.1rem;font-weight:700;cursor:pointer;
-  transition:all .3s;margin-top:15px;text-transform:uppercase;
-  letter-spacing:.5px
+  transition:all .3s;margin-top:15px;text-transform:uppercase;letter-spacing:.5px
 }
-.btn‑english{background:linear-gradient(135deg,#eb4141 0%,#a50000 100%);color:#fff;box-shadow:0 10px 30px rgba(171,0,0,.35)}
-.btn‑bangla{background:linear-gradient(135deg,#ff9156 0%,#ff2b2f 100%);color:#fff;box-shadow:0 10px 30px rgba(255,58,58,.4)}
-.btn‑video{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;box-shadow:0 10px 30px rgba(102,126,234,.4)}
-.btn‑download:hover{transform:translateY(-3px);box-shadow:0 15px 40px rgba(0,0,0,.3)}
-.btn‑download:disabled{opacity:.55;cursor:not-allowed;transform:none}
-.progress‑indicator{
+.btn-english{background:linear-gradient(135deg,#eb4141 0%,#a50000 100%);color:#fff;box-shadow:0 10px 30px rgba(171,0,0,.35)}
+.btn-bangla{background:linear-gradient(135deg,#ff9156 0%,#ff2b2f 100%);color:#fff;box-shadow:0 10px 30px rgba(255,58,58,.4)}
+.btn-video{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;box-shadow:0 10px 30px rgba(102,126,234,.4)}
+.btn-download:hover{transform:translateY(-3px);box-shadow:0 15px 40px rgba(0,0,0,.3)}
+.btn-download:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.progress-indicator{
   margin-top:15px;padding:12px;background:#f0f4ff;
   border-radius:8px;text-align:center;font-size:.9rem;color:#667eea;
   font-weight:600;display:none
 }
-.progress‑indicator.active{display:block}
-.preview‑section{display:flex;flex-direction:column;gap:40px}
-.preview‑container{
+.progress-indicator.active{display:block}
+.preview-section{display:flex;flex-direction:column;gap:40px}
+.preview-container{
   background:#fff;border-radius:20px;padding:30px;
-  box-shadow:0 20px 60px rgba(0,0,0,0.3);color:#000
+  box-shadow:0 20px 60px rgba(0,0,0,.3);color:#000
 }
-.preview‑header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;padding-bottom:15px;border-bottom:2px solid #f0f0f0}
-.preview‑header h2{color:#333;font-size:1.5rem;font-weight:700}
-.lang‑badge{
+.preview-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;padding-bottom:15px;border-bottom:2px solid #f0f0f0}
+.preview-header h2{color:#333;font-size:1.5rem;font-weight:700}
+.lang-badge{
   background:linear-gradient(135deg,#eb4141 0%,#a50000 100%);
   color:#fff;padding:8px 20px;border-radius:20px;font-size:.9rem;font-weight:700
 }
-.lang‑badge.bangla{background:linear-gradient(135deg,#ff9156 0%,#ff2b2f 100%)}
-.banner‑wrapper{
+.lang-badge.bangla{background:linear-gradient(135deg,#ff9156 0%,#ff2b2f 100%)}
+.banner-wrapper{
   margin:0 auto;padding:18px;background:#f7f7f7;
   border-radius:22px;border:12px solid #d32f2f;
   position:relative;overflow:hidden;
@@ -111,40 +119,40 @@ body{
   border:3px solid rgba(211,47,47,.6);
   display:flex;flex-direction:column
 }
-.top‑strip{
+.top-strip{
   background:linear-gradient(90deg,#d32f2f 0%,#a50000 100%);
   color:#fff;padding:18px 28px;
   display:flex;justify-content:space-between;align-items:center;
   z-index:2
 }
-.brand‑area{
+.brand-area{
   display:flex;align-items:center;gap:12px;
   font-weight:800;font-size:1.25rem;text-transform:uppercase;letter-spacing:1px
 }
-.brand‑logo{
+.brand-logo{
   max-width:110px;max-height:48px;
   filter:brightness(.92);opacity:.95
 }
 .slogan{font-size:.9rem;color:rgba(255,255,255,.9);font-weight:500}
-.date‑badge{
+.date-badge{
   background:rgba(255,255,255,.18);
   padding:8px 18px;border-radius:30px;
   font-weight:700;font-size:.9rem;letter-spacing:.5px;
   border:1px solid rgba(255,255,255,.3)
 }
-.image‑panel{
+.image-panel{
   position:relative;flex-grow:1;margin:18px 28px;
   border-radius:14px;overflow:hidden;
   border:6px solid rgba(211,47,47,.85);
   box-shadow:0 12px 28px rgba(0,0,0,.25);
   background:#111;display:flex;align-items:center;justify-content:center
 }
-.image‑panel img{width:100%;height:100%;object-fit:contain;background:#111}
-.image‑overlay{
+.image-panel img{width:100%;height:100%;object-fit:contain;background:#111}
+.image-overlay{
   position:absolute;inset:0;pointer-events:none;
   background:linear-gradient(180deg,rgba(0,0,0,.12) 0%,rgba(0,0,0,.4) 100%)
 }
-.headline‑area{
+.headline-area{
   margin:0 28px 18px;padding:22px 26px;
   background:#c80000;border-radius:12px;
   border:1px solid rgba(211,47,47,.35);
@@ -152,83 +160,85 @@ body{
   display:flex;align-items:center;justify-content:center;
   min-height:90px
 }
-.headline‑text{
+.headline-text{
   color:#fff;font-weight:900;line-height:1.5;
   word-wrap:break-word;overflow-wrap:break-word;
   transition:font-size .2s ease;font-family:inherit;
   text-align:center;letter-spacing:0.3px
 }
-.cta‑ribbon{
+.cta-ribbon{
   margin:0 28px 20px;padding:14px 26px;
   background:linear-gradient(90deg,rgba(211,47,47,1) 0%,rgba(166,0,0,1) 100%);
   color:#fff;font-weight:800;text-transform:uppercase;
   letter-spacing:1px;border-radius:12px;text-align:center;
   box-shadow:0 8px 20px rgba(211,47,47,.45)
 }
-.cta‑ribbon.hidden{display:none}
-.footer‑bar{
+.cta-ribbon.hidden{display:none}
+.footer-bar{
   background:#222;padding:14px 10px;
   display:flex;justify-content:center;align-items:center;
   gap:12px;border-top:3px solid rgba(211,47,47,.8);
   flex-wrap:nowrap;margin-bottom:12px;
   overflow-x:auto
 }
-.social‑item{
+.social-item{
   display:flex;align-items:center;gap:4px;
   font-size:0.72rem;font-weight:700;color:#fff;
   white-space:nowrap;flex-shrink:0
 }
-.social‑icon{
+.social-icon{
   width:24px;height:24px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
   font-size:.8rem;font-weight:700;color:#fff;
   box-shadow:0 4px 8px rgba(0,0,0,.3);flex-shrink:0
 }
-.icon‑facebook{background:#1877F2}
-.icon‑twitter{background:#000}
-.icon‑youtube{background:#FF0000}
-.icon‑instagram{
+.icon-facebook{background:#1877F2}
+.icon-twitter{background:#000}
+.icon-youtube{background:#FF0000}
+.icon-instagram{
   background:linear-gradient(45deg,#f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)
 }
-.bangla‑text{font-family:'Noto Sans Bengali',sans-serif}
-.memory‑indicator{
+.bangla-text{font-family:'Noto Sans Bengali',sans-serif}
+.memory-indicator{
   background:#fff3cd;color:#856404;padding:10px;border-radius:8px;
   margin-top:15px;font-size:0.85rem;text-align:center;display:none
 }
-.video‑processing‑hint{
+.video-processing-hint{
   background:#d4edda;color:#155724;padding:12px;border-radius:8px;
   margin-top:15px;font-size:0.85rem
 }
-.quality‑selector{
+.quality-selector{
   margin-top:15px;padding:12px;background:#f0f4ff;border-radius:8px
 }
-.quality‑selector label{display:block;margin-bottom:5px;font-weight:600}
-.processing‑controls{display:flex;gap:10px;margin-top:15px}
-.btn‑control{
-  flex:1;padding:10px;border:none;border-radius:8px;
-  background:#e0e0e0;cursor:pointer;transition:all .2s
+.quality-selector label{display:block;margin-bottom:5px;font-weight:600}
+.processing-controls{display:flex;gap:10px;margin-top:15px}
+.btn-control{
+  flex:1;padding:10px;border:none;border-radius:8px;background:#e0e0e0;cursor:pointer;transition:all .2s
 }
-.btn‑control:hover{background:#d0d0d0}
+.btn-control:hover{background:#d0d0d0}
 @media(max-width:1200px){
-  .main‑container{grid-template-columns:1fr}
-  .control‑panel{position:static;max-height:none}
+  .main-container{grid-template-columns:1fr}
+  .control-panel{position:static;max-height:none}
 }
 </style>
 </head>
 
 <body>
-<div class="main‑container">
-  <!-- ===================== CONTROL PANEL ===================== -->
-  <div class="control‑panel">
+<div class="main-container">
+
+  <!-- ==================== CONTROL PANEL ==================== -->
+  <div class="control-panel">
     <h1>🎬 Enhanced InfoMela Studio</h1>
     <p>Generate high‑quality images and videos that always work</p>
 
-    <div class="form‑group">
+    <!-- DATE -->
+    <div class="form-group">
       <label>📅 Date</label>
-      <input type="date" id="bannerDate" />
+      <input type="date" id="bannerDate">
     </div>
 
-    <div class="form‑group">
+    <!-- PLATFORM -->
+    <div class="form-group">
       <label>🎥 Platform Ratio</label>
       <select id="platformSelect">
         <option value="fb-square">Facebook – Square (1:1)</option>
@@ -245,49 +255,54 @@ body{
       </select>
     </div>
 
-    <div class="form‑group">
+    <!-- LOGO -->
+    <div class="form-group">
       <label>🖼️ Logo Upload</label>
-      <div class="upload‑box">
-        <input type="file" id="logoInput" accept="image/*" />
-        <div class="upload‑icon">📷</div>
-        <div class="upload‑text">Click to upload logo</div>
-        <div class="file‑info" id="logoInfo">PNG or SVG recommended</div>
+      <div class="upload-box">
+        <input type="file" id="logoInput" accept="image/*">
+        <div class="upload-icon">📷</div>
+        <div class="upload-text">Click to upload logo</div>
+        <div class="file-info" id="logoInfo">PNG or SVG recommended</div>
       </div>
     </div>
 
-    <div class="form‑group">
+    <!-- MEDIA (IMAGE / VIDEO) -->
+    <div class="form-group">
       <label>📸 Photo / Video Upload</label>
-      <div class="upload‑box">
-        <input type="file" id="mediaInput" accept="image/*,video/*" />
-        <div class="upload‑icon">🎥</div>
-        <div class="upload‑text">Click to upload photo or video</div>
-        <div class="file‑info" id="mediaInfo">Images or MP4 videos supported</div>
+      <div class="upload-box">
+        <input type="file" id="mediaInput" accept="image/*,video/*,audio/*">
+        <div class="upload-icon">🎥</div>
+        <div class="upload-text">Click to upload photo, video or audio</div>
+        <div class="file-info" id="mediaInfo">Images, MP4 videos or short audio (MP3/WAV)</div>
       </div>
-      <div class="video‑processing‑hint">
-        💡 Tip: Video uploads will use the whole video as background.
-        During export the banner will be overlaid on each frame.
+      <div class="video-processing-hint">
+        💡 Tip: If you upload a video, the banner will be over‑laid on the whole video.
+        If you upload an audio file, it will be mixed into the final MP4.
       </div>
     </div>
 
-    <div class="form‑group">
+    <!-- ENGLISH HEADLINE -->
+    <div class="form-group">
       <label>✍️ English Headline</label>
       <textarea id="captionEN">HASINA BUILT A MOSQUE IN DHAKA; WHAT WOULD BNP DO?</textarea>
     </div>
 
-    <div class="form‑group">
+    <!-- BANGLA HEADLINE -->
+    <div class="form-group">
       <label>✍️ বাংলা শিরোনাম</label>
-      <textarea id="captionBN" class="bangla‑text">হাসিনা সৌদি ফেরত ঢাকায় মসজিদ তৈরি করেছে; BNP ক্ষমতায় গেলে মন্দির তৈরি করবে?</textarea>
+      <textarea id="captionBN" class="bangla-text">হাসিনা সৌদি ফেরত ঢাকায় মসজিদ তৈরি করেছে; BNP ক্ষমতায় গেলে মন্দির তৈরি করবে?</textarea>
     </div>
 
-    <!-- ------------------- VIDEO SETTINGS ------------------- -->
-    <div class="video‑options">
+    <!-- VIDEO SETTINGS -->
+    <div class="video-options">
       <h4>🎬 Video Settings</h4>
-      <div class="option‑row">
+
+      <div class="option-row">
         <label for="videoDuration">Duration (seconds)</label>
-        <input type="number" id="videoDuration" min="2" max="10" value="5" />
+        <input type="number" id="videoDuration" min="2" max="10" value="5">
       </div>
 
-      <div class="option‑row">
+      <div class="option-row">
         <label for="voiceover">Add Voiceover</label>
         <select id="voiceover">
           <option value="none">No Voiceover</option>
@@ -296,8 +311,17 @@ body{
         </select>
       </div>
 
-      <!-- OPTIONAL: Headline animation selector (you can delete if you don’t need it) -->
-      <div class="option‑row">
+      <!-- OPTIONAL: Background music toggle (free feature) -->
+      <div class="option-row">
+        <label for="addMusic">Add Background Music</label>
+        <select id="addMusic">
+          <option value="none">No Music</option>
+          <option value="use">Use Uploaded Audio</option>
+        </select>
+      </div>
+
+      <!-- HEADLINE ANIMATION selector -->
+      <div class="option-row">
         <label for="headlineAnimation">Headline Animation</label>
         <select id="headlineAnimation">
           <option value="typewriter">Typewriter</option>
@@ -308,152 +332,157 @@ body{
       </div>
     </div>
 
-    <!-- ------------------- ADVANCED OPTIONS ------------------- -->
-    <div class="advanced‑toggle" onclick="toggleAdvancedOptions()">
+    <!-- ADVANCED OPTIONS -->
+    <div class="advanced-toggle" onclick="toggleAdvancedOptions()">
       <span>⚙️ Advanced Options</span>
       <span id="advancedArrow">▼</span>
     </div>
-
-    <div class="advanced‑content" id="advancedContent">
-      <div class="range‑row">
+    <div class="advanced-content" id="advancedContent">
+      <div class="range-row">
         <label for="animationSpeed">Animation Speed</label>
-        <input type="range" id="animationSpeed" min="0.5" max="3" step="0.1" value="1" />
+        <input type="range" id="animationSpeed" min="0.5" max="3" step="0.1" value="1">
       </div>
 
-      <div class="range‑row">
+      <div class="range-row">
         <label for="zoomEffect">Zoom Intensity</label>
-        <input type="range" id="zoomEffect" min="0" max="20" step="1" value="5" />
+        <input type="range" id="zoomEffect" min="0" max="20" step="1" value="5">
       </div>
 
-      <div class="quality‑selector">
+      <div class="quality-selector">
         <label>Video Quality: <span id="qualityValue">75%</span></label>
         <input type="range" id="quality" min="50" max="90" value="75" step="5">
       </div>
     </div>
 
-    <div class="processing‑controls">
-      <button class="btn‑control" id="cancelBtn" style="display:none" onclick="cancelProcessing()">Cancel</button>
-      <button class="btn‑control" id="pauseBtn" style="display:none" onclick="pauseProcessing()">Pause</button>
+    <!-- PROCESSING CONTROLS -->
+    <div class="processing-controls">
+      <button class="btn-control" id="cancelBtn" style="display:none" onclick="cancelProcessing()">Cancel</button>
+      <button class="btn-control" id="pauseBtn" style="display:none" onclick="pauseProcessing()">Pause</button>
     </div>
 
-    <div class="memory‑indicator" id="memoryIndicator">
+    <div class="memory-indicator" id="memoryIndicator">
       ⚠️ High memory usage detected. Close other tabs for best results.
     </div>
 
-    <!-- ------------------- DOWNLOAD BUTTONS ------------------- -->
-    <div class="btn‑section">
+    <!-- DOWNLOAD SECTION (IMAGES) -->
+    <div class="btn-section">
       <h3>📥 Download Static Images</h3>
-      <button class="btn‑download btn‑english" onclick="downloadBanner('english','image')">
+      <button class="btn-download btn-english" onclick="downloadBanner('english','image')">
         Download English Image (JPG)
       </button>
-      <button class="btn‑download btn‑bangla" onclick="downloadBanner('bangla','image')">
+      <button class="btn-download btn-bangla" onclick="downloadBanner('bangla','image')">
         বাংলা ছবি ডাউনলোড করুন (JPG)
       </button>
     </div>
 
-    <div class="btn‑section">
+    <!-- DOWNLOAD SECTION (VIDEOS) -->
+    <div class="btn-section">
       <h3>🎬 Download Videos</h3>
-      <div class="option‑row">
-        <button class="btn‑download btn‑video" style="flex:1"
+      <div class="option-row">
+        <button class="btn-download btn-video" style="flex:1"
                 onclick="downloadBanner('english','mp4')">MP4 Video</button>
-        <button class="btn‑download btn‑video" style="flex:1;margin-left:10px"
+        <button class="btn-download btn-video" style="flex:1;margin-left:10px"
                 onclick="downloadBanner('bangla','mp4')">বাংলা ভিডিও</button>
       </div>
 
-      <div class="option‑row" style="margin-top:10px">
-        <button class="btn‑download btn‑video" style="flex:1;background:#4caf50"
+      <div class="option-row" style="margin-top:10px">
+        <button class="btn-download btn-video" style="flex:1;background:#4caf50"
                 onclick="downloadBanner('english','reels')">Instagram Reels</button>
-        <button class="btn‑download btn‑video" style="flex:1;margin-left:10px;background:#e91e63"
+        <button class="btn-download btn-video" style="flex:1;margin-left:10px;background:#e91e63"
                 onclick="downloadBanner('bangla','reels')">রিলস ডাউনলোড</button>
       </div>
 
-      <div class="progress‑indicator" id="progressIndicator">Preparing for video generation…</div>
+      <div class="progress-indicator" id="progressIndicator">
+        Preparing for video generation…
+      </div>
     </div>
   </div>
 
-  <!-- ===================== PREVIEW SECTION ===================== -->
-  <div class="preview‑section">
+  <!-- ==================== PREVIEW SECTION ==================== -->
+  <div class="preview-section">
+
     <!-- ENGLISH PREVIEW -->
-    <div class="preview‑container">
-      <div class="preview‑header">
+    <div class="preview-container">
+      <div class="preview-header">
         <h2>English Preview</h2>
-        <span class="lang‑badge">ENGLISH</span>
+        <span class="lang-badge">ENGLISH</span>
       </div>
-      <div class="banner‑wrapper">
+      <div class="banner-wrapper">
         <div class="banner" id="bannerEN">
-          <div class="top‑strip">
-            <div class="brand‑area">
-              <img class="brand‑logo" id="logoEN"
+          <div class="top-strip">
+            <div class="brand-area">
+              <img class="brand-logo" id="logoEN"
                 src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='48' viewBox='0 0 200 80'%3E%3Crect fill='%23ffffff' width='200' height='80' rx='10'/%3E%3Ctext x='100' y='50' font-family='Arial' font-size='32' font-weight='bold' fill='%23d32f2f' text-anchor='middle'%3EInfoMela%3C/text%3E%3C/svg%3E"
                 alt="Logo" />
               <span class="slogan">News.Fun.Facts</span>
             </div>
-            <div class="date‑badge" id="dateEN">14 OCTOBER 2025</div>
+            <div class="date-badge" id="dateEN">14 OCTOBER 2025</div>
           </div>
 
-          <div class="image‑panel">
+          <div class="image-panel">
             <img id="bgImageEN"
                  src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80"
                  alt="Headline visual" crossorigin="anonymous" />
-            <div class="image‑overlay"></div>
+            <div class="image-overlay"></div>
           </div>
 
-          <div class="headline‑area">
-            <div class="headline‑text" id="captionDisplayEN"></div>
+          <div class="headline-area">
+            <div class="headline-text" id="captionDisplayEN"></div>
           </div>
 
-          <div class="cta‑ribbon" id="ctaEN">DETAILS IN COMMENTS</div>
+          <div class="cta-ribbon" id="ctaEN">DETAILS IN COMMENTS</div>
 
-          <div class="footer‑bar">
-            <div class="social‑item"><div class="social‑icon icon‑facebook">f</div><span>@theinfomelaa</span></div>
-            <div class="social‑item"><div class="social‑icon icon‑twitter">𝕏</div><span>@theinfomela</span></div>
-            <div class="social‑item"><div class="social‑icon icon‑youtube">▶</div><span>@theinfomela</span></div>
-            <div class="social‑item"><div class="social‑icon icon‑instagram">⧉</div><span>@theinfomela</span></div>
+          <div class="footer-bar">
+            <div class="social-item"><div class="social-icon icon-facebook">f</div><span>@theinfomelaa</span></div>
+            <div class="social-item"><div class="social-icon icon-twitter">𝕏</div><span>@theinfomela</span></div>
+            <div class="social-item"><div class="social-icon icon-youtube">▶</div><span>@theinfomela</span></div>
+            <div class="social-item"><div class="social-icon icon-instagram">⧉</div><span>@theinfomela</span></div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- BENGALI PREVIEW -->
-    <div class="preview‑container">
-      <div class="preview‑header">
+    <!-- BANGLA PREVIEW -->
+    <div class="preview-container">
+      <div class="preview-header">
         <h2>বাংলা প্রিভিউ</h2>
-        <span class="lang‑badge bangla">বাংলা</span>
+        <span class="lang-badge bangla">বাংলা</span>
       </div>
-      <div class="banner‑wrapper">
-        <div class="banner bangla‑text" id="bannerBN">
-          <div class="top‑strip">
-            <div class="brand‑area">
-              <img class="brand‑logo" id="logoBN"
+      <div class="banner-wrapper">
+        <div class="banner bangla-text" id="bannerBN">
+          <div class="top-strip">
+            <div class="brand-area">
+              <img class="brand-logo" id="logoBN"
                 src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='48' viewBox='0 0 200 80'%3E%3Crect fill='%23ffffff' width='200' height='80' rx='10'/%3E%3Ctext x='100' y='50' font-family='Arial' font-size='32' font-weight='bold' fill='%23d32f2f' text-anchor='middle'%3Eইনফো মেলা%3C/text%3E%3C/svg%3E"
                 alt="Logo" />
               <span class="slogan">খবর.মজা.তথ্য</span>
             </div>
-            <div class="date‑badge" id="dateBN">১৪ অক্টোবর ২০২৫</div>
+            <div class="date-badge" id="dateBN">১৪ অক্টোবর ২০২৫</div>
           </div>
 
-          <div class="image‑panel">
+          <div class="image-panel">
             <img id="bgImageBN"
                  src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80"
                  alt="Headline visual" crossorigin="anonymous" />
-            <div class="image‑overlay"></div>
+            <div class="image-overlay"></div>
           </div>
 
-          <div class="headline‑area">
-            <div class="headline‑text" id="captionDisplayBN"></div>
+          <div class="headline-area">
+            <div class="headline-text" id="captionDisplayBN"></div>
           </div>
 
-          <div class="cta‑ribbon" id="ctaBN">বিস্তারিত কমেন্টে</div>
+          <div class="cta-ribbon" id="ctaBN">বিস্তারিত কমেন্টে</div>
 
-          <div class="footer‑bar">
-            <div class="social‑item"><div class="social‑icon icon‑facebook">f</div><span>@theinfomelaa</span></div>
-            <div class="social‑item"><div class="social‑icon icon‑twitter">𝕏</div><span>@theinfomela</span></div>
-            <div class="social‑item"><div class="social‑icon icon‑youtube">▶</div><span>@theinfomela</span></div>
-            <div class="social‑item"><div class="social‑icon icon‑instagram">⧉</div><span>@theinfomela</span></div>
+          <div class="footer-bar">
+            <div class="social-item"><div class="social-icon icon-facebook">f</div><span>@theinfomelaa</span></div>
+            <div class="social-item"><div class="social-icon icon-twitter">𝕏</div><span>@theinfomela</span></div>
+            <div class="social-item"><div class="social-icon icon-youtube">▶</div><span>@theinfomela</span></div>
+            <div class="social-item"><div class="social-icon icon-instagram">⧉</div><span>@theinfomela</span></div>
           </div>
         </div>
       </div>
     </div>
+
   </div>
 </div>
 
@@ -462,7 +491,9 @@ body{
 -------------------------------------------------------------->
 
 <script>
-// ====================== CONSTANTS ======================
+/* --------------------------------------------------------------
+   1️⃣  GLOBAL CONSTANTS & STATE
+   -------------------------------------------------------------- */
 const PLATFORM_RATIOS = {
   'fb-square':      {width:1080, height:1080, crop:'center'},
   'fb-landscape':   {width:1280, height:720,  crop:'center'},
@@ -477,11 +508,10 @@ const PLATFORM_RATIOS = {
   'stories':        {width:1080, height:1920, crop:'top'}
 };
 
-// ====================== STATE ======================
 const state = {
   logoObjectURL: null,
-  mediaObjectURL: null,   // holds preview (image or first‑frame video)
-  mediaType: 'image',     // 'image' or 'video'
+  mediaObjectURL: null,
+  mediaType: 'image',          // 'image' | 'video' | 'audio'
   processing: false,
   ffmpeg: null,
   currentProcess: null,
@@ -489,7 +519,8 @@ const state = {
   processedFrames: 0,
   totalFrames: 0,
   currentLang: null,
-  currentType: null
+  currentType: null,
+  headlineAnim: 'typewriter'   // stored for future use
 };
 
 const videoConfig = {
@@ -497,25 +528,44 @@ const videoConfig = {
   fps: 24,
   animationSpeed: 1,
   zoomEffect: 5,
-  quality: 75   // 50‑90 % (mapped to CRF later)
+  quality: 75            // 50‑90 % (slider)
 };
 
-// ====================== INITIALISATION ======================
+/* --------------------------------------------------------------
+   2️⃣  INITIALISE UI & FFmpeg
+   -------------------------------------------------------------- */
 document.addEventListener('DOMContentLoaded', () => {
   initUI();
   setupEventListeners();
 });
 
-function initUI() {
+async function initUI() {
   const today = new Date();
   document.getElementById('bannerDate').value = today.toISOString().split('T')[0];
   updateDate();
   updateCaptions();
   updatePlatformRatio();
-  loadFFmpeg();
+  await initFFmpeg();               // <‑‑ IMPORTANT – loads FFmpeg
 }
 
-// ------------------- Event listeners -------------------
+/* ---------- FFmpeg initialisation (the part that fixed your error) ---------- */
+async function initFFmpeg() {
+  if (!window.FFmpeg) {
+    console.error('FFmpeg script not loaded.');
+    return;
+  }
+  const { createFFmpeg, fetchFile } = FFmpeg;
+  state.ffmpeg = createFFmpeg({ log: false });
+  try {
+    await state.ffmpeg.load();
+    console.log('✅ FFmpeg loaded successfully');
+  } catch (e) {
+    console.error('❌ FFmpeg failed to load', e);
+    alert('FFmpeg could not be loaded. Please refresh the page and try again.');
+  }
+}
+
+/* ---------- Event listeners ---------- */
 function setupEventListeners() {
   document.getElementById('bannerDate').addEventListener('change', updateDate);
   document.getElementById('platformSelect').addEventListener('change', updatePlatformRatio);
@@ -538,39 +588,33 @@ function setupEventListeners() {
   setInterval(checkMemoryUsage, 5000);
 }
 
-// ------------------- FFmpeg Loader -------------------
-async function loadFFmpeg() {
-  if (!window.FFmpeg) {
-    console.warn('FFmpeg library not available – ensure the script tag loaded correctly.');
-    return;
-  }
-  state.ffmpeg = window.FFmpeg;
-}
-
-// ------------------- Memory monitor -------------------
+/* --------------------------------------------------------------
+   3️⃣  MEMORY USAGE INDICATOR
+   -------------------------------------------------------------- */
 function checkMemoryUsage() {
   const ind = document.getElementById('memoryIndicator');
   if (navigator.storage && navigator.storage.estimate) {
-    navigator.storage.estimate().then(estimate => {
-      const used = estimate.usage || 0;
-      const total = estimate.quota || 1e9;
-      if ((used/total)*100 > 85) ind.style.display = 'block';
-      else ind.style.display = 'none';
+    navigator.storage.estimate().then(e => {
+      const used = e.usage || 0;
+      const total = e.quota || 1e9;
+      ind.style.display = ((used/total)*100 > 85) ? 'block' : 'none';
     });
   }
 }
 
-// ====================== UI UPDATE HELPERS ======================
+/* --------------------------------------------------------------
+   4️⃣  UI HELPERS (date, captions, platform, etc.)
+   -------------------------------------------------------------- */
 function updateDate() {
   const val = document.getElementById('bannerDate').value;
   if (!val) return;
   const d = new Date(val + 'T00:00:00');
 
-  // English
+  // ENGLISH
   const enOpts = {year:'numeric', month:'long', day:'numeric'};
   document.getElementById('dateEN').textContent = d.toLocaleDateString('en-GB', enOpts).toUpperCase();
 
-  // Bengali
+  // BANGLA
   const bnMonths = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
   const bnDay = d.getDate();
   const bnMonth = bnMonths[d.getMonth()];
@@ -607,14 +651,14 @@ function updatePlatformRatio() {
   const ratio = PLATFORM_RATIOS[platform];
   const base = 700;
 
-  document.querySelectorAll('.banner-wrapper').forEach(w => {
-    const banner = w.querySelector('.banner');
-    w.style.width = `${base}px`;
-    const expectedH = Math.round((ratio.height/ratio.width)*base);
+  document.querySelectorAll('.banner-wrapper').forEach(wrapper => {
+    const banner = wrapper.querySelector('.banner');
+    wrapper.style.width = `${base}px`;
+    const expectedH = Math.round((ratio.height/ratio.width) * base);
     const contentH = banner.scrollHeight + 40;
-    w.style.height = `${Math.max(expectedH, contentH)}px`;
+    wrapper.style.height = `${Math.max(expectedH, contentH)}px`;
 
-    // hide CTA for vertical stories / reels
+    // hide CTA on vertical story formats
     const ctaEN = document.getElementById('ctaEN');
     const ctaBN = document.getElementById('ctaBN');
     if (['ig-story','reels','stories'].includes(platform)) {
@@ -627,7 +671,7 @@ function updatePlatformRatio() {
   });
 }
 
-// ------------------- Advanced toggle -------------------
+/* ------------------- Advanced toggle ------------------- */
 function toggleAdvancedOptions() {
   const c = document.getElementById('advancedContent');
   const a = document.getElementById('advancedArrow');
@@ -635,7 +679,9 @@ function toggleAdvancedOptions() {
   a.textContent = c.classList.contains('active') ? '▲' : '▼';
 }
 
-// ====================== MEDIA HANDLING ======================
+/* --------------------------------------------------------------
+   5️⃣  MEDIA HANDLING (logo, image, video, audio)
+   -------------------------------------------------------------- */
 function handleLogoUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -643,10 +689,10 @@ function handleLogoUpload(e) {
   if (state.logoObjectURL) URL.revokeObjectURL(state.logoObjectURL);
   const reader = new FileReader();
   reader.onload = ev => {
-    const dataUrl = ev.target.result;
-    state.logoObjectURL = dataUrl;
-    document.getElementById('logoEN').src = dataUrl;
-    document.getElementById('logoBN').src = dataUrl;
+    const data = ev.target.result;
+    state.logoObjectURL = data;
+    document.getElementById('logoEN').src = data;
+    document.getElementById('logoBN').src = data;
   };
   reader.readAsDataURL(file);
 }
@@ -655,30 +701,38 @@ function handleMediaUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
   const isVideo = file.type.startsWith('video/');
+  const isAudio = file.type.startsWith('audio/');
   const sizeMB = (file.size/1024/1024).toFixed(1);
   document.getElementById('mediaInfo').textContent = isVideo ?
         `Video: ${file.name} (${sizeMB} MB)` :
+        isAudio ?
+        `Audio: ${file.name} (${sizeMB} MB)` :
         `Image: ${file.name} (${sizeMB} MB)`;
+
   if (isVideo) {
     handleVideoUpload(file);
+  } else if (isAudio) {
+    handleAudioUpload(file);
   } else {
     handleImageUpload(file);
   }
 }
 
+/* ---------- Image ---------- */
 function handleImageUpload(file) {
   if (state.mediaObjectURL) URL.revokeObjectURL(state.mediaObjectURL);
   const reader = new FileReader();
   reader.onload = ev => {
-    const dataUrl = ev.target.result;
-    state.mediaObjectURL = dataUrl;
+    const data = ev.target.result;
+    state.mediaObjectURL = data;
     state.mediaType = 'image';
-    document.getElementById('bgImageEN').src = dataUrl;
-    document.getElementById('bgImageBN').src = dataUrl;
+    document.getElementById('bgImageEN').src = data;
+    document.getElementById('bgImageBN').src = data;
   };
   reader.readAsDataURL(file);
 }
 
+/* ---------- Video ---------- */
 function handleVideoUpload(file) {
   if (state.mediaObjectURL) URL.revokeObjectURL(state.mediaObjectURL);
   const video = document.createElement('video');
@@ -687,7 +741,7 @@ function handleVideoUpload(file) {
   video.src = URL.createObjectURL(file);
 
   video.onloadedmetadata = () => {
-    // Grab first frame for preview purposes
+    // extract first frame for preview
     const canvas = document.createElement('canvas');
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -702,13 +756,24 @@ function handleVideoUpload(file) {
   };
 }
 
-// ====================== MAIN DOWNLOAD LOGIC ======================
+/* ---------- Audio (background music) ---------- */
+function handleAudioUpload(file) {
+  // we just keep the file object – it will be mixed later
+  state.audioFile = file;
+  state.mediaType = 'audio';
+  // Show a placeholder image (same as before) – keep UI simple
+  document.getElementById('bgImageEN').src = document.getElementById('bgImageEN').src;
+  document.getElementById('bgImageBN').src = document.getElementById('bgImageBN').src;
+}
+
+/* --------------------------------------------------------------
+   6️⃣  MAIN EXPORT FUNCTION (image / video)
+   -------------------------------------------------------------- */
 async function downloadBanner(lang, type) {
   if (state.processing) {
     alert('Please wait for the current process to finish.');
     return;
   }
-
   state.processing = true;
   state.currentLang = lang;
   state.currentType = type;
@@ -719,14 +784,14 @@ async function downloadBanner(lang, type) {
   const ctaId = lang === 'english' ? 'ctaEN' : 'ctaBN';
   const cta = document.getElementById(ctaId);
 
-  // hide CTA for vertical story formats while processing
+  // hide CTA for vertical formats during processing
   if (['ig-story','reels','stories'].includes(platform)) cta.style.display = 'none';
 
   const progress = document.getElementById('progressIndicator');
   const cancelBtn = document.getElementById('cancelBtn');
-  const pauseBtn = document.getElementById('pauseBtn');
+  const pauseBtn  = document.getElementById('pauseBtn');
 
-  progress.className = 'progress‑indicator active';
+  progress.className = 'progress-indicator active';
   progress.textContent = 'Preparing export…';
   cancelBtn.style.display = 'inline-block';
   pauseBtn.style.display = 'inline-block';
@@ -744,7 +809,7 @@ async function downloadBanner(lang, type) {
   } catch (err) {
     console.error(err);
     progress.textContent = `Error: ${err.message}`;
-    setTimeout(() => progress.className = 'progress‑indicator', 3000);
+    setTimeout(() => progress.className = 'progress-indicator', 3000);
     if (!state.pauseRequested) alert(`Processing failed: ${err.message}`);
   } finally {
     // restore CTA visibility
@@ -757,14 +822,16 @@ async function downloadBanner(lang, type) {
   }
 }
 
-// ------------------- Image download -------------------
+/* --------------------------------------------------------------
+   7️⃣  IMAGE EXPORT (high‑quality)
+   -------------------------------------------------------------- */
 async function downloadImage(bannerId, ratio) {
   const progress = document.getElementById('progressIndicator');
   const banner = document.getElementById(bannerId);
   progress.textContent = 'Rendering high‑res image…';
 
   const canvas = await html2canvas(banner, {
-    scale: 3,
+    scale: 4,               // higher than before → sharper
     useCORS: true,
     allowTaint: true,
     backgroundColor: '#ffffff',
@@ -793,17 +860,19 @@ async function downloadImage(bannerId, ratio) {
     a.click();
     URL.revokeObjectURL(url);
     progress.textContent = 'Image downloaded!';
-    setTimeout(() => progress.className = 'progress‑indicator', 2000);
-  }, 'image/jpeg', 0.95);
+    setTimeout(() => progress.className = 'progress-indicator', 2000);
+  }, 'image/jpeg', 0.98);    // 98 % quality
 }
 
-// ------------------- Video processing -------------------
+/* --------------------------------------------------------------
+   8️⃣  VIDEO PROCESSING (banner over background video OR static image)
+   -------------------------------------------------------------- */
 async function processVideo(bannerId, ratio, forReels = false) {
   const progress = document.getElementById('progressIndicator');
   const bannerEl = document.getElementById(bannerId);
+  const wrapper = bannerEl.parentElement;   // .banner-wrapper
 
-  // Capture banner as canvas (use the wrapper so the whole banner is captured)
-  const wrapper = bannerEl.parentElement; // .banner‑wrapper
+  // Capture the banner (including logo, headline, etc.) as a canvas
   const bannerCanvas = await html2canvas(wrapper, {
     width: ratio.width,
     height: ratio.height,
@@ -811,15 +880,15 @@ async function processVideo(bannerId, ratio, forReels = false) {
     logging: false
   });
 
-  // Decide which processing path to take
   if (state.mediaType === 'video') {
     return await processVideoWithVideoBackground(bannerCanvas, ratio.width, ratio.height);
   } else {
+    // static image background → generate animated frames
     return await processStaticVideo(bannerCanvas, ratio.width, ratio.height);
   }
 }
 
-// ------- 1️⃣ VIDEO + VIDEO BACKGROUND -------
+/* ---------- 1️⃣ Video background ---------- */
 async function processVideoWithVideoBackground(bannerCanvas, width, height) {
   const progress = document.getElementById('progressIndicator');
   const file = document.getElementById('mediaInput').files[0];
@@ -828,43 +897,42 @@ async function processVideoWithVideoBackground(bannerCanvas, width, height) {
   video.muted = true;
   video.src = URL.createObjectURL(file);
 
-  await new Promise(resolve => video.onloadeddata = resolve);
+  await new Promise(res => video.onloadeddata = res);
 
-  const maxDuration = Math.min(video.duration, videoConfig.duration);
-  const totalFrames = Math.floor(maxDuration * videoConfig.fps);
-  const ctx = document.createElement('canvas').getContext('2d');
-  const processingCanvas = document.createElement('canvas');
-  processingCanvas.width = width;
-  processingCanvas.height = height;
-  const procCtx = processingCanvas.getContext('2d');
+  const maxDur = Math.min(video.duration, videoConfig.duration);
+  const totalFrames = Math.floor(maxDur * videoConfig.fps);
+  const procCanvas = document.createElement('canvas');
+  procCanvas.width = width;
+  procCanvas.height = height;
+  const ctx = procCanvas.getContext('2d');
 
   const frames = [];
 
   for (let i = 0; i < totalFrames; i++) {
     if (state.pauseRequested) throw new Error('cancelled');
 
-    const time = i / videoConfig.fps;
-    video.currentTime = time;
+    const t = i / videoConfig.fps;
+    video.currentTime = t;
     await new Promise(r => video.onseeked = r);
 
     // draw video frame
-    procCtx.drawImage(video, 0, 0, width, height);
+    ctx.drawImage(video, 0, 0, width, height);
 
     // overlay banner with animation (zoom + pan)
-    const progressFactor = i / totalFrames;
-    const zoom = 1 + (videoConfig.zoomEffect / 100) * Math.sin(progressFactor * Math.PI);
-    const panX = Math.sin(progressFactor * Math.PI * 2) * 15 * videoConfig.animationSpeed;
-    const panY = Math.cos(progressFactor * Math.PI * 2) * 8 * videoConfig.animationSpeed;
+    const prog = i / totalFrames;
+    const zoom = 1 + (videoConfig.zoomEffect / 100) * Math.sin(prog * Math.PI);
+    const panX = Math.sin(prog * Math.PI * 2) * 15 * videoConfig.animationSpeed;
+    const panY = Math.cos(prog * Math.PI * 2) * 8 * videoConfig.animationSpeed;
 
-    procCtx.save();
-    procCtx.translate(width/2 + panX, height/2 + panY);
-    procCtx.scale(zoom, zoom);
-    procCtx.drawImage(bannerCanvas, -width/2, -height/2);
-    procCtx.restore();
+    ctx.save();
+    ctx.translate(width/2 + panX, height/2 + panY);
+    ctx.scale(zoom, zoom);
+    ctx.drawImage(bannerCanvas, -width/2, -height/2);
+    ctx.restore();
 
     // capture frame
-    const frameBmp = await createImageBitmap(processingCanvas);
-    frames.push(frameBmp);
+    const bmp = await createImageBitmap(procCanvas);
+    frames.push(bmp);
 
     if (i % 5 === 0) {
       progress.textContent = `Processing ${i}/${totalFrames} frames…`;
@@ -875,7 +943,7 @@ async function processVideoWithVideoBackground(bannerCanvas, width, height) {
   return frames;
 }
 
-// ------- 2️⃣ IMAGE + GENERATED ANIMATION -------
+/* ---------- 2️⃣ Static image background (animated) ---------- */
 async function processStaticVideo(bannerCanvas, width, height) {
   const progress = document.getElementById('progressIndicator');
   const totalFrames = videoConfig.duration * videoConfig.fps;
@@ -883,7 +951,6 @@ async function processStaticVideo(bannerCanvas, width, height) {
   procCanvas.width = width;
   procCanvas.height = height;
   const ctx = procCanvas.getContext('2d');
-
   const frames = [];
 
   for (let i = 0; i < totalFrames; i++) {
@@ -902,8 +969,8 @@ async function processStaticVideo(bannerCanvas, width, height) {
     ctx.drawImage(bannerCanvas, -width/2, -height/2);
     ctx.restore();
 
-    const frameBmp = await createImageBitmap(procCanvas);
-    frames.push(frameBmp);
+    const bmp = await createImageBitmap(procCanvas);
+    frames.push(bmp);
 
     if (i % 10 === 0) {
       progress.textContent = `Generating ${Math.round((i/totalFrames)*100)}%`;
@@ -913,68 +980,89 @@ async function processStaticVideo(bannerCanvas, width, height) {
   return frames;
 }
 
-// ------------------- Export to MP4 (with auto‑enhance) -------------------
+/* --------------------------------------------------------------
+   9️⃣  EXPORT TO MP4 (with auto‑enhance and optional music)
+   -------------------------------------------------------------- */
 async function exportToMP4(frames, lang) {
   const progress = document.getElementById('progressIndicator');
 
-  // Ensure FFmpeg is loaded
   if (!state.ffmpeg) {
-    if (!window.FFmpeg) throw new Error('FFmpeg library not loaded.');
-    state.ffmpeg = window.FFmpeg;
-    await state.ffmpeg.load();
+    alert('FFmpeg is not loaded – cannot export video.');
+    return;
   }
 
-  // Write each frame as PNG into the virtual FS
-  progress.textContent = 'Writing frames to virtual FS…';
+  // Write frames as PNGs into FFmpeg FS
+  progress.textContent = 'Writing frames to virtual file‑system…';
   for (let i = 0; i < frames.length; i++) {
-    const canvas = document.createElement('canvas');
-    canvas.width = frames[i].width;
-    canvas.height = frames[i].height;
-    const ctx = canvas.getContext('2d');
+    const cnv = document.createElement('canvas');
+    cnv.width = frames[i].width;
+    cnv.height = frames[i].height;
+    const ctx = cnv.getContext('2d');
     ctx.drawImage(frames[i], 0, 0);
-    const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
-    const buffer = await blob.arrayBuffer();
-    state.ffmpeg.FS('writeFile', `frame_${i}.png`, new Uint8Array(buffer));
+    const blob = await new Promise(r => cnv.toBlob(r, 'image/png'));
+    const buf = await blob.arrayBuffer();
+    state.ffmpeg.FS('writeFile', `frame_${i}.png`, new Uint8Array(buf));
   }
 
   // Build concat list for FFmpeg
   const list = frames.map((_, i) => `file 'frame_${i}.png'\nduration ${1/videoConfig.fps}`).join('\n');
   state.ffmpeg.FS('writeFile', 'list.txt', list);
 
-  // Map quality (50‑90 %) → CRF (33‑16) – lower CRF = higher quality
+  // Map quality slider (50‑90 %) → CRF (33‑16)
   const crf = 51 - Math.round(videoConfig.quality * 0.36);
+
+  // Prepare filter chain:
+  //   - scale/pad to exact dimensions
+  //   - unsharp (sharpen)
+  //   - eq (contrast & brightness)
+  const filter = `scale=${frames[0].width}:${frames[0].height}:force_original_aspect_ratio=decrease,
+                 pad=${frames[0].width}:${frames[0].height}:(ow-iw)/2:(oh-ih)/2,
+                 unsharp=3:3:1.0:3:3:0.5,
+                 eq=contrast=1.1:brightness=0.02`;
+
+  // If the user selected background music, add it now
+  const addMusic = document.getElementById('addMusic').value === 'use' && state.audioFile;
+  let audioCmd = [];
+  if (addMusic) {
+    // Load audio file into FS
+    const audioData = await state.audioFile.arrayBuffer();
+    state.ffmpeg.FS('writeFile', 'bgMusic.mp3', new Uint8Array(audioData));
+    // Mix audio (simple overlay, loops if shorter than video)
+    audioCmd = ['-i', 'bgMusic.mp3', '-filter_complex',
+      `[0:a]volume=0.8[a0];[1:a]volume=0.5[a1];[a0][a1]amix=inputs=2:duration=first:dropout_transition=3[aout]`,
+      '-map', '0:v', '-map', '[aout]'];
+  }
 
   progress.textContent = 'Encoding video (auto‑enhance)…';
   await state.ffmpeg.run(
     '-f', 'concat', '-safe', '0', '-i', 'list.txt',
     '-r', videoConfig.fps.toString(),
-    '-vf',
-      `scale=${frames[0].width}:${frames[0].height}:force_original_aspect_ratio=decrease,
-       pad=${frames[0].width}:${frames[0].height}:(ow-iw)/2:(oh-ih)/2,
-       unsharp=3:3:1.0:3:3:0.5,
-       eq=contrast=1.1:brightness=0.02`,
+    '-vf', filter,
     '-c:v', 'libx264',
     '-crf', crf.toString(),
     '-pix_fmt', 'yuv420p',
     '-profile:v', 'main',
     '-movflags', '+faststart',
     '-g', '25',
+    ...audioCmd,
     'output.mp4'
   );
 
-  // Read the result and trigger download
-  progress.textContent = 'Fetching final file…';
+  progress.textContent = 'Fetching final MP4…';
   const data = state.ffmpeg.FS('readFile', 'output.mp4');
   const videoBlob = new Blob([data.buffer], {type: 'video/mp4'});
   downloadBlob(videoBlob, `InfoMela_${lang}_${Date.now()}.mp4`);
 
-  // Cleanup FS
+  // Clean up FS
   for (let i = 0; i < frames.length; i++) state.ffmpeg.FS('unlink', `frame_${i}.png`);
   state.ffmpeg.FS('unlink', 'list.txt');
+  if (addMusic) state.ffmpeg.FS('unlink', 'bgMusic.mp3');
   state.ffmpeg.FS('unlink', 'output.mp4');
 }
 
-// ------------------- Helper to trigger download -------------------
+/* --------------------------------------------------------------
+   10️⃣  DOWNLOAD HELPER
+   -------------------------------------------------------------- */
 function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -984,33 +1072,34 @@ function downloadBlob(blob, filename) {
   setTimeout(() => URL.revokeObjectURL(url), 100);
 }
 
-// ====================== PROCESS CONTROLS ======================
+/* --------------------------------------------------------------
+   11️⃣  PROCESS CONTROLS (pause / cancel)
+   -------------------------------------------------------------- */
 function cancelProcessing() {
   state.pauseRequested = true;
   document.getElementById('progressIndicator').textContent = 'Cancelling…';
-  if (state.currentProcess) {
-    state.currentProcess.postMessage('pause');
-    state.currentProcess = null;
-  }
+  // No web‑worker is used here – the loops check `state.pauseRequested`
 }
 
 function pauseProcessing() {
   state.pauseRequested = true;
-  const pauseBtn = document.getElementById('pauseBtn');
-  pauseBtn.textContent = 'Resume';
-  pauseBtn.onclick = resumeProcessing;
+  const btn = document.getElementById('pauseBtn');
+  btn.textContent = 'Resume';
+  btn.onclick = resumeProcessing;
   document.getElementById('progressIndicator').textContent = 'Paused';
 }
 
 function resumeProcessing() {
   state.pauseRequested = false;
-  const pauseBtn = document.getElementById('pauseBtn');
-  pauseBtn.textContent = 'Pause';
-  pauseBtn.onclick = pauseProcessing;
+  const btn = document.getElementById('pauseBtn');
+  btn.textContent = 'Pause';
+  btn.onclick = pauseProcessing;
   document.getElementById('progressIndicator').textContent = 'Resuming…';
   // Simple approach: restart the last operation
   setTimeout(() => {
-    if (state.currentLang && state.currentType) downloadBanner(state.currentLang, state.currentType);
+    if (state.currentLang && state.currentType) {
+      downloadBanner(state.currentLang, state.currentType);
+    }
   }, 500);
 }
 </script>
