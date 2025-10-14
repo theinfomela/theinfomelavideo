@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Info Mela Banner With Video Maker</title>
+  <title>Enhanced InfoMela Studio – Reliable Output</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Noto+Sans+Bengali:wght@600;700&display=swap" rel="stylesheet" />
   <style>
     * {margin:0;padding:0;box-sizing:border-box;}
@@ -151,12 +151,17 @@
       background:#c80000;border-radius:12px;
       border:1px solid rgba(211,47,47,.35);
       box-shadow:0 10px 18px rgba(0,0,0,.1);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:80px;
     }
     .headline-text{
       color:#fff;
       font-weight:800;line-height:1.45;
       word-wrap:break-word;overflow-wrap:break-word;
       transition:font-size .2s ease;font-family:inherit;
+      text-align:center;
     }
     .cta-ribbon{
       margin:0 28px 20px;padding:14px 26px;
@@ -198,7 +203,7 @@
 <body>
 <div class="main-container">
   <div class="control-panel">
-    <h1>🎬 Info Mela Banner With Video Maker</h1>
+    <h1>🎬 Enhanced InfoMela Studio</h1>
     <p>Generate high‑quality images and videos that always work</p>
 
     <div class="form-group">
@@ -243,12 +248,12 @@
 
     <div class="form-group">
       <label>✍️ English Headline</label>
-      <textarea id="captionEN"></textarea>
+      <textarea id="captionEN">HASINA BUILT A MOSQUE IN DHAKA; WHAT WOULD BNP DO?</textarea>
     </div>
 
     <div class="form-group">
       <label>✍️ বাংলা শিরোনাম</label>
-      <textarea id="captionBN" class="bangla-text"></textarea>
+      <textarea id="captionBN" class="bangla-text">হাসিনা সৌদি ফেরত ঢাকায় মসজিদ তৈরি করেছে; বিএনপি ক্ষমতায় গেলে মন্দির তৈরি করবে?</textarea>
     </div>
 
     <div class="video-options">
@@ -283,14 +288,14 @@
 
     <div class="btn-section">
       <h3>📥 Download Static Images</h3>
-      <button class="btn-download btn-english" onclick="downloadBanner('english','image')">Download English Image</button>
-      <button class="btn-download btn-bangla" onclick="downloadBanner('bangla','image')">বাংলা ছবি ডাউনলোড করুন</button>
+      <button class="btn-download btn-english" onclick="downloadBanner('english','image')">Download English Image (PNG/JPG)</button>
+      <button class="btn-download btn-bangla" onclick="downloadBanner('bangla','image')">বাংলা ছবি ডাউনলোড করুন (PNG/JPG)</button>
     </div>
 
     <div class="btn-section">
       <h3>🎬 Download Videos</h3>
-      <button class="btn-download btn-video" id="btnVideoEN" onclick="downloadBanner('english','video')">🎥 Download English Video</button>
-      <button class="btn-download btn-video" id="btnVideoBN" onclick="downloadBanner('bangla','video')">🎥 বাংলা ভিডিও ডাউনলোড করুন</button>
+      <button class="btn-download btn-video" id="btnVideoEN" onclick="downloadBanner('english','video')">🎥 Download English Video (MP4)</button>
+      <button class="btn-download btn-video" id="btnVideoBN" onclick="downloadBanner('bangla','video')">🎥 বাংলা ভিডিও ডাউনলোড করুন (MP4)</button>
       <div class="progress-indicator" id="progressIndicator">Generating video…</div>
     </div>
   </div>
@@ -567,7 +572,7 @@ async function downloadBanner(lang, type){
 async function downloadImage(banner, lang, ratio){
   try {
     const canvas = await html2canvas(banner, {
-      scale: 2,
+      scale: 3,
       useCORS: true,
       allowTaint: true,
       backgroundColor: '#ffffff',
@@ -579,8 +584,10 @@ async function downloadImage(banner, lang, ratio){
     const outputCanvas = document.createElement('canvas');
     outputCanvas.width = ratio.width;
     outputCanvas.height = ratio.height;
-    const ctx = outputCanvas.getContext('2d');
+    const ctx = outputCanvas.getContext('2d', { alpha: false });
     
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, outputCanvas.width, outputCanvas.height);
     ctx.drawImage(canvas, 0, 0, outputCanvas.width, outputCanvas.height);
@@ -589,12 +596,12 @@ async function downloadImage(banner, lang, ratio){
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `InfoMela_${lang}_${Date.now()}.png`;
+      link.download = `InfoMela_${lang}_${Date.now()}.jpg`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-    }, 'image/png');
+    }, 'image/jpeg', 0.98);
   } catch(err) {
     console.error('Image generation error:', err);
     throw err;
@@ -609,11 +616,11 @@ async function downloadVideo(banner, lang, ratio){
   btnEN.disabled = true; 
   btnBN.disabled = true;
   progress.classList.add('active');
-  progress.textContent = 'Generating video… This may take a moment';
+  progress.textContent = 'Generating high-quality video… This may take a moment';
 
   try{
     const canvas = await html2canvas(banner, {
-      scale: 1.5,
+      scale: 2.5,
       useCORS: true,
       allowTaint: true,
       backgroundColor: '#ffffff',
@@ -625,7 +632,9 @@ async function downloadVideo(banner, lang, ratio){
     const videoCanvas = document.createElement('canvas');
     videoCanvas.width = ratio.width;
     videoCanvas.height = ratio.height;
-    const ctx = videoCanvas.getContext('2d');
+    const ctx = videoCanvas.getContext('2d', { alpha: false });
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
 
     const supportedMimeTypes = [
       'video/webm;codecs=vp9',
@@ -644,7 +653,7 @@ async function downloadVideo(banner, lang, ratio){
     const stream = videoCanvas.captureStream(videoConfig.fps);
     const recorder = new MediaRecorder(stream, { 
       mimeType: mimeType,
-      videoBitsPerSecond: 2500000
+      videoBitsPerSecond: 5000000
     });
 
     const chunks = [];
