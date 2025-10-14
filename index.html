@@ -423,7 +423,8 @@
       <h4>🎬 Video Settings</h4>
       <div class="option-row">
         <label for="videoDuration">Duration (seconds)</label>
-        <input type="number" id="videoDuration" min="5" max="120" value="30" />
+        <!-- Updated to enforce 30-60 seconds -->
+        <input type="number" id="videoDuration" min="30" max="60" value="30" />
       </div>
       <div class="option-row">
         <label for="fps">Frame Rate</label>
@@ -611,8 +612,9 @@
     document.getElementById('logoInput').addEventListener('change', handleLogoUpload);
     document.getElementById('imageInput').addEventListener('change', handleImageUpload);
 
+    // Updated to enforce 30-60 seconds
     document.getElementById('videoDuration').addEventListener('change', e => {
-      const val = Math.max(5, Math.min(120, Number(e.target.value) || 30));
+      const val = Math.max(30, Math.min(60, Number(e.target.value) || 30));
       videoConfig.duration = val;
       e.target.value = val;
     });
@@ -677,6 +679,7 @@
   function adjustFontSize(elementId, length) {
     const el = document.getElementById(elementId);
     const base = 1.6;
+    // Adjust the divisor (180) to control how quickly font size shrinks with text length
     const size = Math.max(1.1, base - (length / 180));
     el.style.fontSize = `${size}rem`;
   }
@@ -694,6 +697,7 @@
     document.getElementById('logoEN').src = objectURL;
     document.getElementById('logoBN').src = objectURL;
 
+    // Re-extract color after setting the new src
     extractDominantColor(objectURL);
   }
 
@@ -713,24 +717,29 @@
 
   function enhanceAndSetImage(src, elementId) {
     const img = new Image();
-    img.crossOrigin = 'anonymous';
+    img.crossOrigin = 'anonymous'; // Crucial for canvas operations
     img.onload = () => {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       canvas.width = img.width;
       canvas.height = img.height;
+      // Apply filters
       ctx.filter = 'brightness(1.08) contrast(1.08) saturate(1.05)';
       ctx.drawImage(img, 0, 0);
       const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
       document.getElementById(elementId).src = dataUrl;
-      updatePlatformRatio();
+      updatePlatformRatio(); // Update layout if image changes dimensions affect it
+    };
+    img.onerror = () => {
+      console.error("Error loading image for enhancement:", src);
+      alert("Failed to load headline image. Please try a different one.");
     };
     img.src = src;
   }
 
   function extractDominantColor(src) {
     const img = new Image();
-    img.crossOrigin = 'anonymous';
+    img.crossOrigin = 'anonymous'; // Crucial for canvas operations
     img.onload = () => {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
@@ -740,7 +749,9 @@
       const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
       let r = 0, g = 0, b = 0, count = 0;
 
+      // Simple average color calculation (consider more sophisticated algorithms for better results)
       for (let i = 0; i < data.length; i += 4) {
+        // Only consider non-transparent pixels
         if (data[i + 3] > 120) {
           r += data[i];
           g += data[i + 1];
@@ -748,13 +759,21 @@
           count++;
         }
       }
-      if (!count) return;
+
+      if (!count) {
+        console.warn("No visible pixels found to extract color.");
+        return; // Exit if no pixels were processed
+      }
 
       r = Math.round(r / count);
       g = Math.round(g / count);
       b = Math.round(b / count);
       const hex = '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
       applyBrandColor(hex);
+    };
+    img.onerror = () => {
+      console.error("Error loading image for color extraction:", src);
+      alert("Failed to extract dominant color from logo. Using default.");
     };
     img.src = src;
   }
@@ -764,8 +783,9 @@
       wrapper.style.borderColor = color;
     });
 
+    // Generate darker and lighter shades for gradients and accents
     const darker = shadeColor(color, -35);
-    const lighter = shadeColor(color, -15);
+    const lighter = shadeColor(color, -15); // Used for text color
 
     document.querySelectorAll('.top-strip').forEach(el => {
       el.style.background = `linear-gradient(90deg, ${color} 0%, ${darker} 100%)`;
@@ -774,46 +794,64 @@
       el.style.background = `linear-gradient(90deg, ${color} 0%, ${darker} 100%)`;
     });
     document.querySelectorAll('.headline-area').forEach(el => {
-      el.style.borderColor = `${color}55`;
+      el.style.borderColor = `${color}55`; // Add alpha transparency
     });
     document.querySelectorAll('.headline-text').forEach(el => {
       el.style.color = lighter;
     });
     document.querySelectorAll('.image-panel').forEach(el => {
-      el.style.borderColor = `${color}DD`;
+      el.style.borderColor = `${color}DD`; // Add alpha transparency
     });
     document.querySelectorAll('.footer-bar').forEach(el => {
-      el.style.borderTopColor = `${color}CC`;
+      el.style.borderTopColor = `${color}CC`; // Add alpha transparency
     });
   }
 
+  // Helper function to shade a hex color
   function shadeColor(color, percent) {
-    const num = parseInt(color.slice(1), 16);
-    const amt = Math.round(2.55 * percent);
-    let R = (num >> 16) + amt;
-    let G = (num >> 8 & 0x00ff) + amt;
-    let B = (num & 0x0000ff) + amt;
+    let R = parseInt(color.substring(1, 3), 16);
+    let G = parseInt(color.substring(3, 5), 16);
+    let B = parseInt(color.substring(5, 7), 16);
 
-    R = Math.max(Math.min(255, R), 0);
-    G = Math.max(Math.min(255, G), 0);
-    B = Math.max(Math.min(255, B), 0);
+    // Adjust RGB values based on percentage
+    R = Math.round(R * (1 + percent / 100));
+    G = Math.round(G * (1 + percent / 100));
+    B = Math.round(B * (1 + percent / 100));
 
-    return '#' + (R << 16 | G << 8 | B).toString(16).padStart(6, '0').toUpperCase();
+    // Ensure values are within 0-255
+    R = Math.max(0, Math.min(255, R));
+    G = Math.max(0, Math.min(255, G));
+    B = Math.max(0, Math.min(255, B));
+
+    // Convert back to hex and pad with zeros if necessary
+    const RR = ((R.toString(16).length === 1) ? "0" + R.toString(16) : R.toString(16));
+    const GG = ((G.toString(16).length === 1) ? "0" + G.toString(16) : G.toString(16));
+    const BB = ((B.toString(16).length === 1) ? "0" + B.toString(16) : B.toString(16));
+
+    return `#${RR}${GG}${BB}`;
   }
+
 
   function updatePlatformRatio() {
     const platform = document.getElementById('platformSelect').value;
     const ratio = PLATFORM_RATIOS[platform];
-    const baseWidth = 700;
+    const baseWidth = 700; // A fixed width for the wrapper for consistent scaling
 
     document.querySelectorAll('.banner-wrapper').forEach(wrapper => {
-      const banner = wrapper.querySelector('.banner');
-      wrapper.style.width = `${baseWidth}px`;
-      wrapper.style.height = 'auto';
+      const bannerElement = wrapper.querySelector('.banner'); // Get the actual banner content
+      wrapper.style.width = `${baseWidth}px`; // Set wrapper width
+      wrapper.style.height = 'auto'; // Reset height
 
-      const ratioHeight = Math.round((ratio.height / ratio.width) * baseWidth);
-      const contentHeight = banner.scrollHeight + 40;
-      wrapper.style.height = `${Math.max(ratioHeight, contentHeight)}px`;
+      // Calculate the height needed for the specified ratio based on the wrapper width
+      const aspectRatioHeight = Math.round((ratio.height / ratio.width) * baseWidth);
+
+      // Get the current calculated height of the banner's content
+      // We might need to temporarily display it to measure, or rely on known content structure
+      // For simplicity, let's use a common minimum height and adjust if content is taller
+      const contentHeight = bannerElement.offsetHeight || 520; // Fallback to a default minimum height
+
+      // Set the wrapper height to be the aspect ratio height or content height, whichever is larger
+      wrapper.style.height = `${Math.max(aspectRatioHeight, contentHeight)}px`;
     });
   }
 
@@ -825,6 +863,7 @@
     const banner = document.getElementById(bannerId);
     const cta = document.getElementById(ctaId);
 
+    // Hide CTA for video generation to avoid capturing it in the frame
     if (type === 'video') cta.classList.add('hidden');
 
     try {
@@ -833,36 +872,58 @@
       } else {
         await downloadVideo(banner, lang, ratio);
       }
+    } catch (error) {
+        console.error("Download error:", error);
+        alert("An error occurred during download. Please check the console for details.");
     } finally {
+      // Ensure CTA is visible again after download attempt
       if (type === 'video') cta.classList.remove('hidden');
     }
   }
 
   async function downloadImage(banner, lang, ratio) {
     try {
-      const canvas = await html2canvas(banner, {
-        scale: 2,
-        backgroundColor: state.backgroundColor,
-        useCORS: true
+      // Make all <img> elements CORS-safe if they are external URLs.
+      // This is crucial for html2canvas to render them correctly in Chrome.
+      banner.querySelectorAll('img').forEach(img => {
+        if (img.src.startsWith('http')) {
+          img.crossOrigin = 'anonymous';
+        }
       });
 
+      const canvas = await html2canvas(banner, {
+        scale: 2, // Higher scale for better quality
+        backgroundColor: state.backgroundColor,
+        useCORS: true, // Attempt to use CORS
+        allowTaint: false // Important: Prevent tainted canvas from causing security errors
+      });
+
+      // Create a new canvas with the exact target dimensions
       const exportCanvas = document.createElement('canvas');
       exportCanvas.width = ratio.width;
       exportCanvas.height = ratio.height;
       const ctx = exportCanvas.getContext('2d');
 
+      // Fill the export canvas with the chosen background color
       ctx.fillStyle = state.backgroundColor;
       ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
 
+      // Draw the captured html2canvas content onto the export canvas, scaled to fit
       ctx.drawImage(canvas, 0, 0, exportCanvas.width, exportCanvas.height);
 
       const link = document.createElement('a');
       link.download = `InfoMela_${lang}_${Date.now()}.png`;
-      link.href = exportCanvas.toDataURL('image/png', 1.0);
+      link.href = exportCanvas.toDataURL('image/png', 1.0); // Use PNG for best quality
       link.click();
+
     } catch (err) {
-      console.error(err);
-      alert('Image download failed. Please try again.');
+      console.error("Image download failed:", err);
+      // Provide a more specific error message if possible
+      if (err.message.includes('SecurityError') || err.message.includes('tainted')) {
+        alert('Image download failed due to security restrictions. This can happen with external images. Try uploading your own local image.');
+      } else {
+        alert('Image download failed. Please try again.');
+      }
     }
   }
 
@@ -874,101 +935,108 @@
     btnEN.disabled = true;
     btnBN.disabled = true;
     progress.classList.add('active');
-    progress.textContent = 'Preparing video…';
+    progress.textContent = 'Rendering video…';
 
     try {
-      // Ensure MediaRecorder is available
-      if (typeof MediaRecorder === 'undefined') {
-        throw new Error('MediaRecorder is not supported in this browser.');
-      }
+      // Ensure all images are CORS-enabled for html2canvas
+      banner.querySelectorAll('img').forEach(img => {
+        if (img.src.startsWith('http')) {
+          img.crossOrigin = 'anonymous';
+        }
+      });
 
-      // Snapshot the current banner as a static frame
-      const snapshot = await html2canvas(banner, {
-        scale: 1,
+      // Take a high-resolution snapshot of the banner as the base for video frames
+      const snapshotCanvas = await html2canvas(banner, {
+        scale: 2, // Higher scale for better quality frames
         backgroundColor: state.backgroundColor,
         useCORS: true,
-        width: ratio.width,
+        allowTaint: false,
+        width: ratio.width, // Ensure snapshot matches target dimensions
         height: ratio.height
       });
 
-      const snapshotImage = await canvasToImage(snapshot);
+      const snapshotImage = await canvasToImage(snapshotCanvas); // Convert canvas to Image object
 
-      // Create a video canvas for rendering frames
+      // Create a canvas for rendering video frames
       const videoCanvas = document.createElement('canvas');
       videoCanvas.width = ratio.width;
       videoCanvas.height = ratio.height;
       const ctx = videoCanvas.getContext('2d');
 
-      // Determine a supported mime type
-      const mimeTypes = [
-        'video/webm; codecs=vp9',
-        'video/webm; codecs=vp8',
-        'video/webm'
-      ];
-      let mimeType = null;
-      for (const t of mimeTypes) {
-        if (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) {
-          mimeType = t;
-          break;
-        }
-      }
+      // Determine a supported mime type for MediaRecorder
+      // VP8 is generally well-supported in Chrome, VP9 might be less reliable
+      const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp8')
+        ? 'video/webm;codecs=vp8'
+        : MediaRecorder.isTypeSupported('video/webm')
+          ? 'video/webm'
+          : null; // Fallback if none are supported
+
       if (!mimeType) {
-        throw new Error('No supported video mime type found for this browser.');
+        throw new Error('MediaRecorder or a compatible codec is not supported in this browser.');
       }
 
-      const totalFrames = Math.max(1, Math.round(videoConfig.duration * videoConfig.fps));
+      // Get video configuration
+      const durationMillis = Math.max(30, Math.min(60, Number(videoConfig.duration))) * 1000; // Enforce 30-60 seconds
+      const fps = videoConfig.fps;
+      const totalFrames = Math.round(fps * (durationMillis / 1000));
 
-      // Prepare for recording
-      const stream = videoCanvas.captureStream(videoConfig.fps);
-      const chunks = [];
+      // Prepare MediaRecorder
+      const stream = videoCanvas.captureStream(fps); // Capture stream at desired FPS
       const recorder = new MediaRecorder(stream, { mimeType });
+      const chunks = []; // Array to hold recorded video data chunks
 
       recorder.ondataavailable = (e) => {
-        if (e.data && e.data.size > 0) chunks.push(e.data);
-      };
-
-      // Start recording and render frames over time
-      recorder.start();
-
-      const start = performance.now();
-      let frame = 0;
-      const interval = 1000 / videoConfig.fps;
-
-      const renderLoop = () => {
-        const elapsed = performance.now() - start;
-        frame = Math.min(totalFrames, Math.max(0, Math.round(elapsed / interval)));
-
-        const progressRatio = Math.min(1, frame / totalFrames);
-        drawAnimatedFrame(ctx, snapshotImage, videoCanvas.width, videoCanvas.height, progressRatio);
-
-        if (frame < totalFrames) {
-          requestAnimationFrame(renderLoop);
-        } else {
-          // Stop and finalize
-          recorder.stop();
+        if (e.data && e.data.size > 0) {
+          chunks.push(e.data);
         }
       };
-      // Kick off the loop
-      renderLoop();
 
-      // Wait for the recorder to stop
+      let frameCounter = 0;
+      const startTime = performance.now();
+
+      // Animation rendering loop
+      function renderFrameLoop() {
+        const currentTime = performance.now();
+        const elapsedMillis = currentTime - startTime;
+        const progressRatio = Math.min(1, elapsedMillis / durationMillis); // 0 to 1
+
+        drawAnimatedFrame(ctx, snapshotImage, videoCanvas.width, videoCanvas.height, progressRatio);
+
+        frameCounter++; // Increment frame counter
+
+        // Continue rendering until duration is met
+        if (progressRatio < 1) {
+          requestAnimationFrame(renderFrameLoop); // Use requestAnimationFrame for smooth rendering
+        } else {
+          // Once rendering is complete, stop the recorder
+          recorder.stop();
+        }
+      }
+
+      // Start recording and kick off the animation loop
+      recorder.start();
+      renderFrameLoop();
+
+      // Wait for the recorder to finish and emit the 'stop' event
       await new Promise((resolve, reject) => {
         recorder.onstop = resolve;
         recorder.onerror = reject;
       });
 
-      // Create final blob and trigger download
+      // Create a Blob from the collected chunks and trigger download
       const blob = new Blob(chunks, { type: mimeType });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `InfoMela_${lang}_video_${Date.now()}.webm`;
+      link.download = `InfoMela_${lang}_loop_${Date.now()}.webm`; // Use .webm for WebM format
       link.click();
-      URL.revokeObjectURL(url);
+      URL.revokeObjectURL(url); // Clean up the object URL
+
     } catch (err) {
-      console.error(err);
-      alert('Video generation failed. Please try again with a supported browser (Chrome/Edge/Firefox).');
+      console.error("Video generation failed:", err);
+      alert('Video generation failed. Please ensure you are using a compatible browser (like Chrome, Edge, or Firefox) and try again. Shorten duration if issues persist.');
     } finally {
+      // Re-enable buttons and hide progress indicator
       btnEN.disabled = false;
       btnBN.disabled = false;
       progress.classList.remove('active');
@@ -976,42 +1044,50 @@
     }
   }
 
+  // Function to draw a single animated frame
   function drawAnimatedFrame(ctx, image, width, height, progress) {
     ctx.fillStyle = state.backgroundColor;
     ctx.fillRect(0, 0, width, height);
 
-    // Simple parallax-like animation controls
-    const oscillation = Math.sin(progress * Math.PI * videoConfig.animationSpeed);
-    const zoom = 1 + (videoConfig.zoomEffect / 100) * oscillation;
-    const moveX = Math.sin(progress * Math.PI * 2) * 12;
-    const moveY = Math.cos(progress * Math.PI * 1.5) * 8;
+    // Animation parameters
+    const animationSpeed = videoConfig.animationSpeed;
+    const zoomIntensity = videoConfig.zoomEffect;
 
-    ctx.save();
-    ctx.translate(width / 2 + moveX, height / 2 + moveY);
-    ctx.scale(zoom, zoom);
+    // Use 'progress' (0 to 1) to drive animations
+    // Simple oscillation for subtle movement
+    const oscillationFactor = Math.sin(progress * Math.PI * animationSpeed); // Cycle through sine wave
+
+    // Zoom effect: increase scale based on oscillation and intensity
+    const zoomScale = 1 + (oscillationFactor * (zoomIntensity / 100));
+
+    // Pan effect: move horizontally and vertically
+    // Use different phase shifts or speeds for more complex motion
+    const panX = Math.sin(progress * Math.PI * 2) * 15; // Horizontal movement
+    const panY = Math.cos(progress * Math.PI * 1.5) * 10; // Vertical movement
+
+    ctx.save(); // Save the current drawing state
+
+    // Translate to the center, apply pan, then scale
+    ctx.translate(width / 2 + panX, height / 2 + panY);
+    ctx.scale(zoomScale, zoomScale);
+
+    // Draw the snapshot image, centered and scaled
+    // The image's center should align with the canvas center for proper scaling/panning
     ctx.drawImage(image, -width / 2, -height / 2, width, height);
-    ctx.restore();
+
+    ctx.restore(); // Restore the drawing state
   }
 
+  // Helper function to convert a canvas to an Image object
   function canvasToImage(canvas) {
-    // Fixed syntax: return a proper promise
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => resolve(img);
-      img.onerror = () => {
-        // Fallback if image can't be created
-        // Create a simple placeholder
-        const ph = document.createElement('canvas');
-        ph.width = canvas.width;
-        ph.height = canvas.height;
-        const pctx = ph.getContext('2d');
-        pctx.fillStyle = '#ffffff';
-        pctx.fillRect(0, 0, ph.width, ph.height);
-        const placeholder = new Image();
-        placeholder.onload = () => resolve(placeholder);
-        placeholder.src = ph.toDataURL('image/png');
+      img.onerror = (err) => {
+        console.error("Error converting canvas to image:", err);
+        reject(err);
       };
-      img.src = canvas.toDataURL('image/png', 1.0);
+      img.src = canvas.toDataURL('image/png', 1.0); // Use PNG for better quality
     });
   }
 </script>
