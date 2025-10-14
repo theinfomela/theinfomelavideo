@@ -147,21 +147,25 @@
       background:linear-gradient(180deg,rgba(0,0,0,.12) 0%,rgba(0,0,0,.4) 100%);
     }
     .headline-area{
-      margin:0 28px 18px;padding:18px 22px;
+      margin:0 28px 18px;padding:22px 26px;
       background:#c80000;border-radius:12px;
       border:1px solid rgba(211,47,47,.35);
       box-shadow:0 10px 18px rgba(0,0,0,.1);
       display:flex;
       align-items:center;
       justify-content:center;
-      min-height:80px;
+      min-height:90px;
     }
     .headline-text{
       color:#fff;
-      font-weight:800;line-height:1.45;
-      word-wrap:break-word;overflow-wrap:break-word;
-      transition:font-size .2s ease;font-family:inherit;
+      font-weight:900;
+      line-height:1.5;
+      word-wrap:break-word;
+      overflow-wrap:break-word;
+      transition:font-size .2s ease;
+      font-family:inherit;
       text-align:center;
+      letter-spacing:0.3px;
     }
     .cta-ribbon{
       margin:0 28px 20px;padding:14px 26px;
@@ -172,20 +176,27 @@
     }
     .cta-ribbon.hidden{display:none;}
     .footer-bar{
-      background:#222;padding:16px 15px;
+      background:#222;padding:14px 10px;
       display:flex;justify-content:center;align-items:center;
-      gap:18px;border-top:3px solid rgba(211,47,47,.8);
-      flex-wrap:wrap;margin-bottom:12px;
+      gap:12px;border-top:3px solid rgba(211,47,47,.8);
+      flex-wrap:nowrap;
+      margin-bottom:12px;
+      overflow-x:auto;
     }
     .social-item{
-      display:flex;align-items:center;gap:6px;
-      font-size:.9rem;font-weight:700;color:#fff;
+      display:flex;align-items:center;gap:4px;
+      font-size:0.72rem;
+      font-weight:700;
+      color:#fff;
+      white-space:nowrap;
+      flex-shrink:0;
     }
     .social-icon{
-      width:28px;height:28px;border-radius:50%;
+      width:24px;height:24px;border-radius:50%;
       display:flex;align-items:center;justify-content:center;
-      font-size:.9rem;font-weight:700;color:#fff;
+      font-size:.8rem;font-weight:700;color:#fff;
       box-shadow:0 4px 8px rgba(0,0,0,.3);
+      flex-shrink:0;
     }
     .icon-facebook{background:#1877F2;}
     .icon-twitter{background:#000;}
@@ -288,14 +299,14 @@
 
     <div class="btn-section">
       <h3>📥 Download Static Images</h3>
-      <button class="btn-download btn-english" onclick="downloadBanner('english','image')">Download English Image (PNG/JPG)</button>
-      <button class="btn-download btn-bangla" onclick="downloadBanner('bangla','image')">বাংলা ছবি ডাউনলোড করুন (PNG/JPG)</button>
+      <button class="btn-download btn-english" onclick="downloadBanner('english','image')">Download English Image (JPG)</button>
+      <button class="btn-download btn-bangla" onclick="downloadBanner('bangla','image')">বাংলা ছবি ডাউনলোড করুন (JPG)</button>
     </div>
 
     <div class="btn-section">
       <h3>🎬 Download Videos</h3>
-      <button class="btn-download btn-video" id="btnVideoEN" onclick="downloadBanner('english','video')">🎥 Download English Video (MP4)</button>
-      <button class="btn-download btn-video" id="btnVideoBN" onclick="downloadBanner('bangla','video')">🎥 বাংলা ভিডিও ডাউনলোড করুন (MP4)</button>
+      <button class="btn-download btn-video" id="btnVideoEN" onclick="downloadBanner('english','video')">🎥 Download English Video (WebM)</button>
+      <button class="btn-download btn-video" id="btnVideoBN" onclick="downloadBanner('bangla','video')">🎥 বাংলা ভিডিও ডাউনলোড করুন (WebM)</button>
       <div class="progress-indicator" id="progressIndicator">Generating video…</div>
     </div>
   </div>
@@ -496,8 +507,8 @@ function updateCaptions() {
 
 function adjustFontSize(elId, len) {
   const el = document.getElementById(elId);
-  const base = 1.6;
-  const size = Math.max(1.2, base - (len/150));
+  const base = 1.85;
+  const size = Math.max(1.4, base - (len/150));
   el.style.fontSize = `${size}rem`;
 }
 
@@ -563,7 +574,7 @@ async function downloadBanner(lang, type){
     else                     await downloadVideo(banner, lang, ratio);
   } catch(err) {
     console.error('Download error:', err);
-    alert('Download failed. Please try again.');
+    alert('Download failed: ' + err.message);
   } finally {
     if (type === 'video') cta.classList.remove('hidden');
   }
@@ -616,11 +627,13 @@ async function downloadVideo(banner, lang, ratio){
   btnEN.disabled = true; 
   btnBN.disabled = true;
   progress.classList.add('active');
-  progress.textContent = 'Generating high-quality video… This may take a moment';
+  progress.textContent = 'Preparing video generation…';
 
   try{
+    progress.textContent = 'Capturing banner snapshot…';
+    
     const canvas = await html2canvas(banner, {
-      scale: 2.5,
+      scale: 2,
       useCORS: true,
       allowTaint: true,
       backgroundColor: '#ffffff',
@@ -629,6 +642,8 @@ async function downloadVideo(banner, lang, ratio){
       removeContainer: true
     });
 
+    progress.textContent = 'Setting up video encoder…';
+
     const videoCanvas = document.createElement('canvas');
     videoCanvas.width = ratio.width;
     videoCanvas.height = ratio.height;
@@ -636,24 +651,14 @@ async function downloadVideo(banner, lang, ratio){
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
 
-    const supportedMimeTypes = [
-      'video/webm;codecs=vp9',
-      'video/webm;codecs=vp8',
-      'video/webm'
-    ];
-    
-    let mimeType = supportedMimeTypes[0];
-    for(let mime of supportedMimeTypes) {
-      if(MediaRecorder.isTypeSupported(mime)) {
-        mimeType = mime;
-        break;
-      }
+    if (!MediaRecorder.isTypeSupported('video/webm')) {
+      throw new Error('Video recording not supported in this browser. Please use Chrome, Edge, or Firefox.');
     }
 
     const stream = videoCanvas.captureStream(videoConfig.fps);
     const recorder = new MediaRecorder(stream, { 
-      mimeType: mimeType,
-      videoBitsPerSecond: 5000000
+      mimeType: 'video/webm',
+      videoBitsPerSecond: 3000000
     });
 
     const chunks = [];
@@ -671,8 +676,8 @@ async function downloadVideo(banner, lang, ratio){
       ctx.fillRect(0, 0, videoCanvas.width, videoCanvas.height);
 
       const zoom = 1 + (videoConfig.zoomEffect / 100) * Math.sin(progress * Math.PI);
-      const panX = Math.sin(progress * Math.PI * 2) * 20 * videoConfig.animationSpeed;
-      const panY = Math.cos(progress * Math.PI * 2) * 10 * videoConfig.animationSpeed;
+      const panX = Math.sin(progress * Math.PI * 2) * 15 * videoConfig.animationSpeed;
+      const panY = Math.cos(progress * Math.PI * 2) * 8 * videoConfig.animationSpeed;
 
       ctx.save();
       ctx.translate(videoCanvas.width / 2 + panX, videoCanvas.height / 2 + panY);
@@ -681,14 +686,18 @@ async function downloadVideo(banner, lang, ratio){
       ctx.restore();
     };
 
+    progress.textContent = 'Recording video frames…';
     recorder.start();
 
     const animate = () => {
       if (currentFrame < totalFrames) {
         drawFrame();
         currentFrame++;
+        const percent = Math.round((currentFrame / totalFrames) * 100);
+        progress.textContent = `Recording video: ${percent}%`;
         requestAnimationFrame(animate);
       } else {
+        progress.textContent = 'Finalizing video…';
         recorder.stop();
       }
     };
@@ -697,15 +706,17 @@ async function downloadVideo(banner, lang, ratio){
 
     await new Promise((resolve, reject) => {
       recorder.onstop = resolve;
-      recorder.onerror = reject;
-      setTimeout(() => reject(new Error('Recording timeout')), (videoConfig.duration + 5) * 1000);
+      recorder.onerror = (e) => reject(new Error('Recording failed: ' + e));
+      setTimeout(() => reject(new Error('Recording timeout - please try shorter duration')), (videoConfig.duration + 10) * 1000);
     });
 
     if(chunks.length === 0) {
       throw new Error('No video data recorded');
     }
 
-    const blob = new Blob(chunks, { type: mimeType });
+    progress.textContent = 'Creating download file…';
+
+    const blob = new Blob(chunks, { type: 'video/webm' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -716,13 +727,21 @@ async function downloadVideo(banner, lang, ratio){
     
     setTimeout(() => URL.revokeObjectURL(url), 100);
 
+    progress.textContent = 'Video downloaded successfully!';
+    setTimeout(() => {
+      progress.classList.remove('active');
+    }, 2000);
+
   } catch(err) {
     console.error('Video generation error:', err);
+    progress.textContent = 'Video generation failed!';
+    setTimeout(() => {
+      progress.classList.remove('active');
+    }, 3000);
     throw err;
   } finally {
     btnEN.disabled = false;
     btnBN.disabled = false;
-    progress.classList.remove('active');
   }
 }
 </script>
