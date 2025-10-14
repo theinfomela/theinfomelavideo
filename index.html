@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Enhanced InfoMela Studio — Fixed Version</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Noto+Sans+Bengali:wght@600;700&display=swap" rel="stylesheet" />
-
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -48,11 +47,8 @@
     .upload-icon { font-size: 2rem; color: #667eea; }
     .file-info { font-size: 0.85rem; color: #555; margin-top: 10px; }
     .btn-download {
-      width: 100%; padding: 15px; border: none...continuing the full working code (🥁 drumroll) — here’s **the rest of your InfoMela Studio HTML** with the fully integrated fixed **image + video export** system:
-
-```html
-      ; border-radius: 12px; font-weight: 700; cursor: pointer;
-      transition: all 0.3s; color: #fff; margin-top: 10px;
+      width: 100%; padding: 15px; border: none; border-radius: 12px;
+      font-weight: 700; cursor: pointer; transition: all 0.3s; color: #fff; margin-top: 10px;
     }
     .btn-english { background: linear-gradient(135deg, #eb4141, #a50000); }
     .btn-bangla { background: linear-gradient(135deg, #ff9156, #ff2b2b); }
@@ -82,7 +78,7 @@
 <div class="main-container">
   <div class="control-panel">
     <h1>🎬 InfoMela Studio (Fixed)</h1>
-    <p>Generate banners and 30–60s looping videos directly in Chrome!</p>
+    <p>Generate banners and 30–120s looping videos directly in Chrome!</p>
 
     <div class="form-group">
       <label>Date</label>
@@ -127,8 +123,8 @@
     </div>
 
     <div class="form-group">
-      <label>Video Duration (30–60s)</label>
-      <input type="number" id="videoDuration" min="30" max="60" value="30"/>
+      <label>Video Duration (30–120s)</label>
+      <input type="number" id="videoDuration" min="30" max="120" value="60"/>
     </div>
     <div class="form-group">
       <label>Zoom Intensity (0–30)</label>
@@ -176,109 +172,121 @@
 
 <script>
 const PLATFORM_RATIOS = {
-  'fb-square': { width:1080,height:1080 },
-  'youtube': { width:1920,height:1080 },
-  'ig-story': { width:1080,height:1920 }
+  'fb-square': { width:1080, height:1080 },
+  'youtube': { width:1920, height:1080 },
+  'ig-story': { width:1080, height:1920 }
 };
 const state = { backgroundColor:'#fff', logoURL:null, photoURL:null };
-const videoConfig = { duration:30, fps:30, zoomEffect:8 };
+const videoConfig = { duration:60, fps:30, zoomEffect:8 };
 
-document.addEventListener('DOMContentLoaded',()=>{
+document.addEventListener('DOMContentLoaded', () => {
   const today = new Date(); document.getElementById('bannerDate').value = today.toISOString().split('T')[0];
   updateDate(); updateCaptions();
-  document.getElementById('bannerDate').addEventListener('change',updateDate);
-  document.getElementById('captionEN').addEventListener('input',updateCaptions);
-  document.getElementById('captionBN').addEventListener('input',updateCaptions);
-  document.getElementById('logoInput').addEventListener('change',handleLogoUpload);
-  document.getElementById('imageInput').addEventListener('change',handleImageUpload);
-  document.getElementById('videoDuration').addEventListener('input',e=>{videoConfig.duration=Math.min(60,Math.max(30,Number(e.target.value)));});
-  document.getElementById('zoomEffect').addEventListener('input',e=>{videoConfig.zoomEffect=Number(e.target.value);});
+  document.getElementById('bannerDate').addEventListener('change', updateDate);
+  document.getElementById('captionEN').addEventListener('input', updateCaptions);
+  document.getElementById('captionBN').addEventListener('input', updateCaptions);
+  document.getElementById('logoInput').addEventListener('change', handleLogoUpload);
+  document.getElementById('imageInput').addEventListener('change', handleImageUpload);
+  document.getElementById('videoDuration').addEventListener('input', e => {
+    videoConfig.duration = Math.min(120, Math.max(30, Number(e.target.value)));
+  });
+  document.getElementById('zoomEffect').addEventListener('input', e => {
+    videoConfig.zoomEffect = Number(e.target.value);
+  });
 });
 
-function updateDate(){
-  const val=document.getElementById('bannerDate').value; if(!val)return;
-  const date=new Date(val);
-  document.getElementById('dateEN').textContent=date.toDateString().toUpperCase();
-  document.getElementById('dateBN').textContent=`${date.getDate()} অক্টোবর ${date.getFullYear()}`;
+function updateDate() {
+  const val = document.getElementById('bannerDate').value; if (!val) return;
+  const date = new Date(val);
+  document.getElementById('dateEN').textContent = date.toDateString().toUpperCase();
+  document.getElementById('dateBN').textContent = `${date.getDate()} অক্টোবর ${date.getFullYear()}`;
 }
 
-function updateCaptions(){
-  document.getElementById('captionDisplayEN').textContent=document.getElementById('captionEN').value;
-  document.getElementById('captionDisplayBN').textContent=document.getElementById('captionBN').value;
+function updateCaptions() {
+  document.getElementById('captionDisplayEN').textContent = document.getElementById('captionEN').value;
+  document.getElementById('captionDisplayBN').textContent = document.getElementById('captionBN').value;
 }
 
-function handleLogoUpload(e){
-  const file=e.target.files[0]; if(!file)return;
-  state.logoURL=URL.createObjectURL(file);
-  document.getElementById('logoInfo').textContent=file.name;
-  document.getElementById('logoEN').src=state.logoURL;
-  document.getElementById('logoBN').src=state.logoURL;
-}
-function handleImageUpload(e){
-  const file=e.target.files[0]; if(!file)return;
-  state.photoURL=URL.createObjectURL(file);
-  document.getElementById('imageInfo').textContent=file.name;
-  document.getElementById('bgImageEN').src=state.photoURL;
-  document.getElementById('bgImageBN').src=state.photoURL;
+function handleLogoUpload(e) {
+  const file = e.target.files[0]; if (!file) return;
+  state.logoURL = URL.createObjectURL(file);
+  document.getElementById('logoInfo').textContent = file.name;
+  document.getElementById('logoEN').src = state.logoURL;
+  document.getElementById('logoBN').src = state.logoURL;
 }
 
-async function downloadBanner(lang,type){
-  const banner=document.getElementById(lang==='english'?'bannerEN':'bannerBN');
-  const ratio=PLATFORM_RATIOS[document.getElementById('platformSelect').value];
-  if(type==='image') await downloadImage(banner,lang,ratio); else await downloadVideo(banner,lang,ratio);
+function handleImageUpload(e) {
+  const file = e.target.files[0]; if (!file) return;
+  state.photoURL = URL.createObjectURL(file);
+  document.getElementById('imageInfo').textContent = file.name;
+  document.getElementById('bgImageEN').src = state.photoURL;
+  document.getElementById('bgImageBN').src = state.photoURL;
 }
 
-async function downloadImage(banner,lang,ratio){
-  try{
-    banner.querySelectorAll('img').forEach(img=>{if(img.src.startsWith('http'))img.crossOrigin='anonymous';});
-    const canvas=await html2canvas(banner,{scale:2,backgroundColor:'#fff',useCORS:true});
-    const final=document.createElement('canvas'); final.width=ratio.width; final.height=ratio.height;
-    const ctx=final.getContext('2d'); ctx.drawImage(canvas,0,0,final.width,final.height);
-    const link=document.createElement('a'); link.download=`InfoMela_${lang}_${Date.now()}.png`;
-    link.href=final.toDataURL('image/png'); link.click();
-  }catch(err){console.error(err);alert('Image download failed. Use local uploads or same-origin images.');}
+async function downloadBanner(lang, type) {
+  const banner = document.getElementById(lang === 'english' ? 'bannerEN' : 'bannerBN');
+  const ratio = PLATFORM_RATIOS[document.getElementById('platformSelect').value];
+  if (type === 'image') await downloadImage(banner, lang, ratio); else await downloadVideo(banner, lang, ratio);
 }
 
-async function downloadVideo(banner,lang,ratio){
-  const progress=document.getElementById('progressIndicator');
-  const btnEN=document.getElementById('btnVideoEN'), btnBN=document.getElementById('btnVideoBN');
-  btnEN.disabled=btnBN.disabled=true; progress.textContent='Rendering video...';
+async function downloadImage(banner, lang, ratio) {
+  try {
+    banner.querySelectorAll('img').forEach(img => { if (img.src.startsWith('http')) img.crossOrigin = 'anonymous'; });
+    const canvas = await html2canvas(banner, { scale: 2, backgroundColor: '#fff', useCORS: true });
+    const final = document.createElement('canvas'); final.width = ratio.width; final.height = ratio.height;
+    const ctx = final.getContext('2d'); ctx.drawImage(canvas, 0, 0, final.width, final.height);
+    const link = document.createElement('a'); link.download = `InfoMela_${lang}_${Date.now()}.png`;
+    link.href = final.toDataURL('image/png'); link.click();
+  } catch (err) { console.error(err); alert('Image download failed. Use local uploads or same-origin images.'); }
+}
 
-  try{
-    const snapshot=await html2canvas(banner,{scale:2,backgroundColor:'#fff',useCORS:true});
-    const image=await canvasToImage(snapshot);
-    const canvas=document.createElement('canvas'); canvas.width=ratio.width; canvas.height=ratio.height;
-    const ctx=canvas.getContext('2d');
-    const mime=MediaRecorder.isTypeSupported('video/webm;codecs=vp8')?'video/webm;codecs=vp8':'video/webm';
-    const stream=canvas.captureStream(videoConfig.fps);
-    const recorder=new MediaRecorder(stream,{mimeType:mime});
-    const chunks=[]; recorder.ondataavailable=e=>e.data.size&&chunks.push(e.data);
-    const totalFrames=Math.floor(videoConfig.duration*videoConfig.fps); recorder.start();
-    let frame=0;
-    function drawFrame(){
-      const p=(frame%totalFrames)/totalFrames;
-      drawAnimatedFrame(ctx,image,canvas.width,canvas.height,p);
+async function downloadVideo(banner, lang, ratio) {
+  const progress = document.getElementById('progressIndicator');
+  const btnEN = document.getElementById('btnVideoEN'), btnBN = document.getElementById('btnVideoBN');
+  btnEN.disabled = btnBN.disabled = true; progress.textContent = 'Rendering video...';
+
+  try {
+    const snapshot = await html2canvas(banner, { scale: 2, backgroundColor: '#fff', useCORS: true });
+    const image = await canvasToImage(snapshot);
+
+    const canvas = document.createElement('canvas'); canvas.width = ratio.width; canvas.height = ratio.height;
+    const ctx = canvas.getContext('2d');
+
+    const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp8') ? 'video/webm;codecs=vp8' : 'video/webm';
+    const stream = canvas.captureStream(videoConfig.fps);
+    const recorder = new MediaRecorder(stream, { mimeType: mime });
+    const chunks = []; recorder.ondataavailable = e => e.data.size && chunks.push(e.data);
+
+    const totalFrames = Math.floor(videoConfig.duration * videoConfig.fps); recorder.start();
+    let frame = 0;
+
+    function drawFrame() {
+      const p = (frame % totalFrames) / totalFrames;
+      drawAnimatedFrame(ctx, image, canvas.width, canvas.height, p);
       frame++;
-      if(frame<totalFrames)setTimeout(drawFrame,1000/videoConfig.fps); else recorder.stop();
+      if (frame < totalFrames) setTimeout(drawFrame, 1000 / videoConfig.fps); else recorder.stop();
     }
+
     drawFrame();
-    await new Promise(r=>recorder.onstop=r);
-    const blob=new Blob(chunks,{type:mime}); const url=URL.createObjectURL(blob);
-    const a=document.createElement('a'); a.href=url; a.download=`InfoMela_${lang}_${Date.now()}.webm`; a.click(); URL.revokeObjectURL(url);
-  }catch(err){console.error(err);alert('Video generation failed.');}
-  finally{btnEN.disabled=btnBN.disabled=false; progress.textContent='';}
+    await new Promise(r => recorder.onstop = r);
+
+    const blob = new Blob(chunks, { type: mime }); const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = `InfoMela_${lang}_${Date.now()}.webm`; a.click(); URL.revokeObjectURL(url);
+  } catch (err) { console.error(err); alert('Video generation failed.'); }
+  finally { btnEN.disabled = btnBN.disabled = false; progress.textContent = ''; }
 }
 
-function drawAnimatedFrame(ctx,img,w,h,p){
-  ctx.fillStyle='#fff'; ctx.fillRect(0,0,w,h);
-  const zoom=1+(Math.sin(p*Math.PI*2)*(videoConfig.zoomEffect/100));
-  const offsetX=Math.sin(p*Math.PI*4)*20; const offsetY=Math.cos(p*Math.PI*4)*10;
-  ctx.save(); ctx.translate(w/2+offsetX,h/2+offsetY); ctx.scale(zoom,zoom);
-  ctx.drawImage(img,-w/2,-h/2,w,h); ctx.restore();
+function drawAnimatedFrame(ctx, img, w, h, p) {
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h);
+  const zoom = 1 + (Math.sin(p * Math.PI * 2) * (videoConfig.zoomEffect / 100));
+  const offsetX = Math.sin(p * Math.PI * 4) * 20;
+  const offsetY = Math.cos(p * Math.PI * 4) * 10;
+  ctx.save(); ctx.translate(w / 2 + offsetX, h / 2 + offsetY); ctx.scale(zoom, zoom);
+  ctx.drawImage(img, -w / 2, -h / 2, w, h); ctx.restore();
 }
 
-function canvasToImage(canvas){
-  return new Promise(res=>{const img=new Image(); img.onload=()=>res(img); img.src=canvas.toDataURL();});
+function canvasToImage(canvas) {
+  return new Promise(res => { const img = new Image(); img.onload = () => res(img); img.src = canvas.toDataURL(); });
 }
 </script>
 
