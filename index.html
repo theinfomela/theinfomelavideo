@@ -9,8 +9,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Noto+Sans+Bengali:wght@600;700&display=swap"
       rel="stylesheet">
 
-<!-- --------------- FFmpeg (WebAssembly) ---------------- -->
-<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.4/dist/ffmpeg.min.js"></script>
+<!-- --------------- MP4 MUXER (for WebCodecs) ---------------- -->
+<script src="https://cdn.jsdelivr.net/npm/mp4-muxer@2.0.2/build/mp4-muxer.min.js"></script>
 
 <!-- --------------- html2canvas (for image export) ---------------- -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -270,14 +270,13 @@ body{
     <div class="form-group">
       <label>📸 Photo / Video Upload</label>
       <div class="upload-box">
-        <input type="file" id="mediaInput" accept="image/*,video/*,audio/*">
+        <input type="file" id="mediaInput" accept="image/*,video/*">
         <div class="upload-icon">🎥</div>
-        <div class="upload-text">Click to upload photo, video or audio</div>
-        <div class="file-info" id="mediaInfo">Images, MP4 videos or short audio (MP3/WAV)</div>
+        <div class="upload-text">Click to upload photo or video</div>
+        <div class="file-info" id="mediaInfo">Images or MP4 videos</div>
       </div>
       <div class="video-processing-hint">
         💡 Tip: If you upload a video, the banner will be over‑laid on the whole video.
-        If you upload an audio file, it will be mixed into the final MP4.
       </div>
     </div>
 
@@ -300,24 +299,6 @@ body{
       <div class="option-row">
         <label for="videoDuration">Duration (seconds)</label>
         <input type="number" id="videoDuration" min="2" max="10" value="5">
-      </div>
-
-      <div class="option-row">
-        <label for="voiceover">Add Voiceover</label>
-        <select id="voiceover">
-          <option value="none">No Voiceover</option>
-          <option value="en">English AI Voice</option>
-          <option value="bn">বাংলা AI Voice</option>
-        </select>
-      </div>
-
-      <!-- OPTIONAL: Background music toggle (free feature) -->
-      <div class="option-row">
-        <label for="addMusic">Add Background Music</label>
-        <select id="addMusic">
-          <option value="none">No Music</option>
-          <option value="use">Use Uploaded Audio</option>
-        </select>
       </div>
 
       <!-- HEADLINE ANIMATION selector -->
@@ -511,16 +492,15 @@ const PLATFORM_RATIOS = {
 const state = {
   logoObjectURL: null,
   mediaObjectURL: null,
-  mediaType: 'image',          // 'image' | 'video' | 'audio'
+  mediaType: 'image',          // 'image' | 'video'
   processing: false,
-  ffmpeg: null,
   currentProcess: null,
   pauseRequested: false,
   processedFrames: 0,
   totalFrames: 0,
   currentLang: null,
   currentType: null,
-  headlineAnim: 'typewriter'   // stored for future use
+  headlineAnim: 'typewriter'
 };
 
 const videoConfig = {
@@ -528,44 +508,25 @@ const videoConfig = {
   fps: 24,
   animationSpeed: 1,
   zoomEffect: 5,
-  quality: 75            // 50‑90 % (slider)
+  quality: 75
 };
 
 /* --------------------------------------------------------------
-   2️⃣  INITIALISE UI & FFmpeg
+   2️⃣  INITIALISE UI
    -------------------------------------------------------------- */
 document.addEventListener('DOMContentLoaded', () => {
   initUI();
   setupEventListeners();
 });
 
-async function initUI() {
+function initUI() {
   const today = new Date();
   document.getElementById('bannerDate').value = today.toISOString().split('T')[0];
   updateDate();
   updateCaptions();
   updatePlatformRatio();
-  await initFFmpeg();               // <‑‑ IMPORTANT – loads FFmpeg
 }
 
-/* ---------- FFmpeg initialisation (the part that fixed your error) ---------- */
-async function initFFmpeg() {
-  if (!window.FFmpeg) {
-    console.error('FFmpeg script not loaded.');
-    return;
-  }
-  const { createFFmpeg, fetchFile } = FFmpeg;
-  state.ffmpeg = createFFmpeg({ log: false });
-  try {
-    await state.ffmpeg.load();
-    console.log('✅ FFmpeg loaded successfully');
-  } catch (e) {
-    console.error('❌ FFmpeg failed to load', e);
-    alert('FFmpeg could not be loaded. Please refresh the page and try again.');
-  }
-}
-
-/* ---------- Event listeners ---------- */
 function setupEventListeners() {
   document.getElementById('bannerDate').addEventListener('change', updateDate);
   document.getElementById('platformSelect').addEventListener('change', updatePlatformRatio);
@@ -610,11 +571,9 @@ function updateDate() {
   if (!val) return;
   const d = new Date(val + 'T00:00:00');
 
-  // ENGLISH
   const enOpts = {year:'numeric', month:'long', day:'numeric'};
   document.getElementById('dateEN').textContent = d.toLocaleDateString('en-GB', enOpts).toUpperCase();
 
-  // BANGLA
   const bnMonths = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
   const bnDay = d.getDate();
   const bnMonth = bnMonths[d.getMonth()];
@@ -658,20 +617,14 @@ function updatePlatformRatio() {
     const contentH = banner.scrollHeight + 40;
     wrapper.style.height = `${Math.max(expectedH, contentH)}px`;
 
-    // hide CTA on vertical story formats
     const ctaEN = document.getElementById('ctaEN');
     const ctaBN = document.getElementById('ctaBN');
-    if (['ig-story','reels','stories'].includes(platform)) {
-      ctaEN.style.display = 'none';
-      ctaBN.style.display = 'none';
-    } else {
-      ctaEN.style.display = 'block';
-      ctaBN.style.display = 'block';
-    }
+    const isVertical = ['ig-story','reels','stories'].includes(platform);
+    ctaEN.style.display = isVertical ? 'none' : 'block';
+    ctaBN.style.display = isVertical ? 'none' : 'block';
   });
 }
 
-/* ------------------- Advanced toggle ------------------- */
 function toggleAdvancedOptions() {
   const c = document.getElementById('advancedContent');
   const a = document.getElementById('advancedArrow');
@@ -680,7 +633,7 @@ function toggleAdvancedOptions() {
 }
 
 /* --------------------------------------------------------------
-   5️⃣  MEDIA HANDLING (logo, image, video, audio)
+   5️⃣  MEDIA HANDLING (logo, image, video)
    -------------------------------------------------------------- */
 function handleLogoUpload(e) {
   const file = e.target.files[0];
@@ -701,24 +654,18 @@ function handleMediaUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
   const isVideo = file.type.startsWith('video/');
-  const isAudio = file.type.startsWith('audio/');
   const sizeMB = (file.size/1024/1024).toFixed(1);
   document.getElementById('mediaInfo').textContent = isVideo ?
         `Video: ${file.name} (${sizeMB} MB)` :
-        isAudio ?
-        `Audio: ${file.name} (${sizeMB} MB)` :
         `Image: ${file.name} (${sizeMB} MB)`;
 
   if (isVideo) {
     handleVideoUpload(file);
-  } else if (isAudio) {
-    handleAudioUpload(file);
   } else {
     handleImageUpload(file);
   }
 }
 
-/* ---------- Image ---------- */
 function handleImageUpload(file) {
   if (state.mediaObjectURL) URL.revokeObjectURL(state.mediaObjectURL);
   const reader = new FileReader();
@@ -732,7 +679,6 @@ function handleImageUpload(file) {
   reader.readAsDataURL(file);
 }
 
-/* ---------- Video ---------- */
 function handleVideoUpload(file) {
   if (state.mediaObjectURL) URL.revokeObjectURL(state.mediaObjectURL);
   const video = document.createElement('video');
@@ -741,7 +687,6 @@ function handleVideoUpload(file) {
   video.src = URL.createObjectURL(file);
 
   video.onloadedmetadata = () => {
-    // extract first frame for preview
     const canvas = document.createElement('canvas');
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -756,16 +701,6 @@ function handleVideoUpload(file) {
   };
 }
 
-/* ---------- Audio (background music) ---------- */
-function handleAudioUpload(file) {
-  // we just keep the file object – it will be mixed later
-  state.audioFile = file;
-  state.mediaType = 'audio';
-  // Show a placeholder image (same as before) – keep UI simple
-  document.getElementById('bgImageEN').src = document.getElementById('bgImageEN').src;
-  document.getElementById('bgImageBN').src = document.getElementById('bgImageBN').src;
-}
-
 /* --------------------------------------------------------------
    6️⃣  MAIN EXPORT FUNCTION (image / video)
    -------------------------------------------------------------- */
@@ -774,6 +709,13 @@ async function downloadBanner(lang, type) {
     alert('Please wait for the current process to finish.');
     return;
   }
+
+  // Check for WebCodecs support
+  if ((type === 'mp4' || type === 'reels') && typeof VideoEncoder === 'undefined') {
+      alert('Video export is not supported in your browser. Please use a modern browser like Google Chrome or Microsoft Edge.');
+      return;
+  }
+
   state.processing = true;
   state.currentLang = lang;
   state.currentType = type;
@@ -784,7 +726,6 @@ async function downloadBanner(lang, type) {
   const ctaId = lang === 'english' ? 'ctaEN' : 'ctaBN';
   const cta = document.getElementById(ctaId);
 
-  // hide CTA for vertical formats during processing
   if (['ig-story','reels','stories'].includes(platform)) cta.style.display = 'none';
 
   const progress = document.getElementById('progressIndicator');
@@ -801,8 +742,8 @@ async function downloadBanner(lang, type) {
     if (type === 'image') {
       await downloadImage(bannerId, ratio);
     } else if (type === 'mp4' || type === 'reels') {
-      const frames = await processVideo(bannerId, ratio, type === 'reels');
-      await exportToMP4(frames, lang);
+      const frames = await generateFrames(bannerId, ratio);
+      await exportToMP4(frames, lang, ratio);
     } else {
       throw new Error('Unsupported export type');
     }
@@ -812,9 +753,8 @@ async function downloadBanner(lang, type) {
     setTimeout(() => progress.className = 'progress-indicator', 3000);
     if (!state.pauseRequested) alert(`Processing failed: ${err.message}`);
   } finally {
-    // restore CTA visibility
-    if (['ig-story','reels','stories'].includes(platform)) cta.style.display = 'none';
-    else cta.style.display = 'block';
+    const isVertical = ['ig-story','reels','stories'].includes(platform);
+    cta.style.display = isVertical ? 'none' : 'block';
     cancelBtn.style.display = 'none';
     pauseBtn.style.display = 'none';
     state.processing = false;
@@ -831,7 +771,7 @@ async function downloadImage(bannerId, ratio) {
   progress.textContent = 'Rendering high‑res image…';
 
   const canvas = await html2canvas(banner, {
-    scale: 4,               // higher than before → sharper
+    scale: 4,
     useCORS: true,
     allowTaint: true,
     backgroundColor: '#ffffff',
@@ -840,7 +780,6 @@ async function downloadImage(bannerId, ratio) {
     removeContainer: true
   });
 
-  // Resize to exact platform dimensions
   const out = document.createElement('canvas');
   out.width = ratio.width;
   out.height = ratio.height;
@@ -861,203 +800,187 @@ async function downloadImage(bannerId, ratio) {
     URL.revokeObjectURL(url);
     progress.textContent = 'Image downloaded!';
     setTimeout(() => progress.className = 'progress-indicator', 2000);
-  }, 'image/jpeg', 0.98);    // 98 % quality
+  }, 'image/jpeg', 0.98);
 }
 
 /* --------------------------------------------------------------
-   8️⃣  VIDEO PROCESSING (banner over background video OR static image)
+   8️⃣  VIDEO FRAME GENERATION
    -------------------------------------------------------------- */
-async function processVideo(bannerId, ratio, forReels = false) {
-  const progress = document.getElementById('progressIndicator');
-  const bannerEl = document.getElementById(bannerId);
-  const wrapper = bannerEl.parentElement;   // .banner-wrapper
+async function generateFrames(bannerId, ratio) {
+  if (state.mediaType === 'video') {
+    return await generateFramesWithVideoBackground(bannerId, ratio);
+  } else {
+    return await generateFramesWithStaticBackground(bannerId, ratio);
+  }
+}
 
-  // Capture the banner (including logo, headline, etc.) as a canvas
-  const bannerCanvas = await html2canvas(wrapper, {
-    width: ratio.width,
-    height: ratio.height,
-    scale: 1.5,
-    logging: false
+async function generateFramesWithStaticBackground(bannerId, ratio) {
+    const progress = document.getElementById('progressIndicator');
+    const bannerEl = document.getElementById(bannerId);
+    const wrapper = bannerEl.parentElement;
+
+    const bannerCanvas = await html2canvas(wrapper, {
+        width: ratio.width,
+        height: ratio.height,
+        scale: 1.5,
+        logging: false,
+        useCORS: true,
+        allowTaint: true
+    });
+
+    const totalFrames = videoConfig.duration * videoConfig.fps;
+    const procCanvas = document.createElement('canvas');
+    procCanvas.width = ratio.width;
+    procCanvas.height = ratio.height;
+    const ctx = procCanvas.getContext('2d');
+    const frames = [];
+
+    for (let i = 0; i < totalFrames; i++) {
+        if (state.pauseRequested) throw new Error('Processing cancelled');
+
+        const prog = i / totalFrames;
+        const zoom = 1 + (videoConfig.zoomEffect / 100) * Math.sin(prog * Math.PI);
+        const panX = Math.sin(prog * Math.PI * 2) * 15 * videoConfig.animationSpeed;
+        const panY = Math.cos(prog * Math.PI * 2) * 8 * videoConfig.animationSpeed;
+
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, ratio.width, ratio.height);
+        ctx.save();
+        ctx.translate(ratio.width / 2 + panX, ratio.height / 2 + panY);
+        ctx.scale(zoom, zoom);
+        ctx.drawImage(bannerCanvas, -ratio.width / 2, -ratio.height / 2);
+        ctx.restore();
+
+        const bmp = await createImageBitmap(procCanvas);
+        frames.push(bmp);
+
+        if (i % 10 === 0) {
+            progress.textContent = `Generating frames: ${Math.round((i / totalFrames) * 100)}%`;
+        }
+    }
+    return frames;
+}
+
+
+async function generateFramesWithVideoBackground(bannerId, ratio) {
+    const progress = document.getElementById('progressIndicator');
+    const bannerEl = document.getElementById(bannerId);
+    const wrapper = bannerEl.parentElement;
+    const file = document.getElementById('mediaInput').files[0];
+
+    const bannerCanvas = await html2canvas(wrapper, {
+        width: ratio.width,
+        height: ratio.height,
+        scale: 1.5,
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null // Make it transparent
+    });
+
+    const video = document.createElement('video');
+    video.preload = 'auto';
+    video.muted = true;
+    video.src = URL.createObjectURL(file);
+    await new Promise(res => video.onloadeddata = res);
+
+    const maxDur = Math.min(video.duration, videoConfig.duration);
+    const totalFrames = Math.floor(maxDur * videoConfig.fps);
+    const procCanvas = document.createElement('canvas');
+    procCanvas.width = ratio.width;
+    procCanvas.height = ratio.height;
+    const ctx = procCanvas.getContext('2d');
+    const frames = [];
+
+    for (let i = 0; i < totalFrames; i++) {
+        if (state.pauseRequested) throw new Error('Processing cancelled');
+
+        const t = i / videoConfig.fps;
+        video.currentTime = t;
+        await new Promise(r => video.onseeked = r);
+
+        ctx.drawImage(video, 0, 0, ratio.width, ratio.height);
+        ctx.drawImage(bannerCanvas, 0, 0, ratio.width, ratio.height); // Overlay the transparent banner
+
+        const bmp = await createImageBitmap(procCanvas);
+        frames.push(bmp);
+
+        if (i % 5 === 0) {
+            progress.textContent = `Processing video frames: ${i}/${totalFrames}`;
+        }
+    }
+
+    URL.revokeObjectURL(video.src);
+    return frames;
+}
+
+
+/* --------------------------------------------------------------
+   9️⃣  EXPORT TO MP4 (using WebCodecs)
+   -------------------------------------------------------------- */
+async function exportToMP4(frames, lang, ratio) {
+  const progress = document.getElementById('progressIndicator');
+  progress.textContent = 'Initializing video encoder…';
+
+  const { Mp4Muxer } = self.Mp4Muxer;
+  let muxer = new Mp4Muxer({
+      target: 'buffer',
+      video: {
+          codec: 'avc',
+          width: ratio.width,
+          height: ratio.height,
+          frameRate: videoConfig.fps
+      },
   });
 
-  if (state.mediaType === 'video') {
-    return await processVideoWithVideoBackground(bannerCanvas, ratio.width, ratio.height);
-  } else {
-    // static image background → generate animated frames
-    return await processStaticVideo(bannerCanvas, ratio.width, ratio.height);
-  }
-}
+  // Map quality slider (50-90%) to a bitrate
+  const qualityBitrate = (videoConfig.quality / 100) * 8_000_000 + 2_000_000; // 2-10 Mbps
 
-/* ---------- 1️⃣ Video background ---------- */
-async function processVideoWithVideoBackground(bannerCanvas, width, height) {
-  const progress = document.getElementById('progressIndicator');
-  const file = document.getElementById('mediaInput').files[0];
-  const video = document.createElement('video');
-  video.preload = 'auto';
-  video.muted = true;
-  video.src = URL.createObjectURL(file);
+  const videoEncoder = new VideoEncoder({
+    output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
+    error: (e) => console.error('VideoEncoder error:', e.message),
+  });
+  videoEncoder.configure({
+    codec: 'avc1.42001f',
+    width: ratio.width,
+    height: ratio.height,
+    bitrate: qualityBitrate,
+    framerate: videoConfig.fps,
+    latencyMode: 'quality'
+  });
 
-  await new Promise(res => video.onloadeddata = res);
+  state.totalFrames = frames.length;
+  state.processedFrames = 0;
 
-  const maxDur = Math.min(video.duration, videoConfig.duration);
-  const totalFrames = Math.floor(maxDur * videoConfig.fps);
-  const procCanvas = document.createElement('canvas');
-  procCanvas.width = width;
-  procCanvas.height = height;
-  const ctx = procCanvas.getContext('2d');
-
-  const frames = [];
-
-  for (let i = 0; i < totalFrames; i++) {
-    if (state.pauseRequested) throw new Error('cancelled');
-
-    const t = i / videoConfig.fps;
-    video.currentTime = t;
-    await new Promise(r => video.onseeked = r);
-
-    // draw video frame
-    ctx.drawImage(video, 0, 0, width, height);
-
-    // overlay banner with animation (zoom + pan)
-    const prog = i / totalFrames;
-    const zoom = 1 + (videoConfig.zoomEffect / 100) * Math.sin(prog * Math.PI);
-    const panX = Math.sin(prog * Math.PI * 2) * 15 * videoConfig.animationSpeed;
-    const panY = Math.cos(prog * Math.PI * 2) * 8 * videoConfig.animationSpeed;
-
-    ctx.save();
-    ctx.translate(width/2 + panX, height/2 + panY);
-    ctx.scale(zoom, zoom);
-    ctx.drawImage(bannerCanvas, -width/2, -height/2);
-    ctx.restore();
-
-    // capture frame
-    const bmp = await createImageBitmap(procCanvas);
-    frames.push(bmp);
-
-    if (i % 5 === 0) {
-      progress.textContent = `Processing ${i}/${totalFrames} frames…`;
-    }
-  }
-
-  URL.revokeObjectURL(video.src);
-  return frames;
-}
-
-/* ---------- 2️⃣ Static image background (animated) ---------- */
-async function processStaticVideo(bannerCanvas, width, height) {
-  const progress = document.getElementById('progressIndicator');
-  const totalFrames = videoConfig.duration * videoConfig.fps;
-  const procCanvas = document.createElement('canvas');
-  procCanvas.width = width;
-  procCanvas.height = height;
-  const ctx = procCanvas.getContext('2d');
-  const frames = [];
-
-  for (let i = 0; i < totalFrames; i++) {
-    if (state.pauseRequested) throw new Error('cancelled');
-
-    const prog = i / totalFrames;
-    const zoom = 1 + (videoConfig.zoomEffect / 100) * Math.sin(prog * Math.PI);
-    const panX = Math.sin(prog * Math.PI * 2) * 15 * videoConfig.animationSpeed;
-    const panY = Math.cos(prog * Math.PI * 2) * 8 * videoConfig.animationSpeed;
-
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, width, height);
-    ctx.save();
-    ctx.translate(width/2 + panX, height/2 + panY);
-    ctx.scale(zoom, zoom);
-    ctx.drawImage(bannerCanvas, -width/2, -height/2);
-    ctx.restore();
-
-    const bmp = await createImageBitmap(procCanvas);
-    frames.push(bmp);
-
-    if (i % 10 === 0) {
-      progress.textContent = `Generating ${Math.round((i/totalFrames)*100)}%`;
-    }
-  }
-
-  return frames;
-}
-
-/* --------------------------------------------------------------
-   9️⃣  EXPORT TO MP4 (with auto‑enhance and optional music)
-   -------------------------------------------------------------- */
-async function exportToMP4(frames, lang) {
-  const progress = document.getElementById('progressIndicator');
-
-  if (!state.ffmpeg) {
-    alert('FFmpeg is not loaded – cannot export video.');
-    return;
-  }
-
-  // Write frames as PNGs into FFmpeg FS
-  progress.textContent = 'Writing frames to virtual file‑system…';
   for (let i = 0; i < frames.length; i++) {
-    const cnv = document.createElement('canvas');
-    cnv.width = frames[i].width;
-    cnv.height = frames[i].height;
-    const ctx = cnv.getContext('2d');
-    ctx.drawImage(frames[i], 0, 0);
-    const blob = await new Promise(r => cnv.toBlob(r, 'image/png'));
-    const buf = await blob.arrayBuffer();
-    state.ffmpeg.FS('writeFile', `frame_${i}.png`, new Uint8Array(buf));
+    if (state.pauseRequested) throw new Error('Processing cancelled');
+
+    const frame = frames[i];
+    const videoFrame = new VideoFrame(frame, {
+      timestamp: (i * 1e6) / videoConfig.fps,
+      duration: 1e6 / videoConfig.fps
+    });
+
+    videoEncoder.encode(videoFrame);
+    videoFrame.close();
+    frame.close(); // Important for memory management
+
+    state.processedFrames++;
+    if (i % 10 === 0) {
+      progress.textContent = `Encoding video: ${Math.round((i / frames.length) * 100)}%`;
+    }
   }
 
-  // Build concat list for FFmpeg
-  const list = frames.map((_, i) => `file 'frame_${i}.png'\nduration ${1/videoConfig.fps}`).join('\n');
-  state.ffmpeg.FS('writeFile', 'list.txt', list);
+  progress.textContent = 'Finalizing MP4 file…';
+  await videoEncoder.flush();
+  muxer.finalize();
 
-  // Map quality slider (50‑90 %) → CRF (33‑16)
-  const crf = 51 - Math.round(videoConfig.quality * 0.36);
+  const { buffer } = muxer.target;
+  const videoBlob = new Blob([buffer], { type: 'video/mp4' });
 
-  // Prepare filter chain:
-  //   - scale/pad to exact dimensions
-  //   - unsharp (sharpen)
-  //   - eq (contrast & brightness)
-  const filter = `scale=${frames[0].width}:${frames[0].height}:force_original_aspect_ratio=decrease,
-                 pad=${frames[0].width}:${frames[0].height}:(ow-iw)/2:(oh-ih)/2,
-                 unsharp=3:3:1.0:3:3:0.5,
-                 eq=contrast=1.1:brightness=0.02`;
-
-  // If the user selected background music, add it now
-  const addMusic = document.getElementById('addMusic').value === 'use' && state.audioFile;
-  let audioCmd = [];
-  if (addMusic) {
-    // Load audio file into FS
-    const audioData = await state.audioFile.arrayBuffer();
-    state.ffmpeg.FS('writeFile', 'bgMusic.mp3', new Uint8Array(audioData));
-    // Mix audio (simple overlay, loops if shorter than video)
-    audioCmd = ['-i', 'bgMusic.mp3', '-filter_complex',
-      `[0:a]volume=0.8[a0];[1:a]volume=0.5[a1];[a0][a1]amix=inputs=2:duration=first:dropout_transition=3[aout]`,
-      '-map', '0:v', '-map', '[aout]'];
-  }
-
-  progress.textContent = 'Encoding video (auto‑enhance)…';
-  await state.ffmpeg.run(
-    '-f', 'concat', '-safe', '0', '-i', 'list.txt',
-    '-r', videoConfig.fps.toString(),
-    '-vf', filter,
-    '-c:v', 'libx264',
-    '-crf', crf.toString(),
-    '-pix_fmt', 'yuv420p',
-    '-profile:v', 'main',
-    '-movflags', '+faststart',
-    '-g', '25',
-    ...audioCmd,
-    'output.mp4'
-  );
-
-  progress.textContent = 'Fetching final MP4…';
-  const data = state.ffmpeg.FS('readFile', 'output.mp4');
-  const videoBlob = new Blob([data.buffer], {type: 'video/mp4'});
   downloadBlob(videoBlob, `InfoMela_${lang}_${Date.now()}.mp4`);
-
-  // Clean up FS
-  for (let i = 0; i < frames.length; i++) state.ffmpeg.FS('unlink', `frame_${i}.png`);
-  state.ffmpeg.FS('unlink', 'list.txt');
-  if (addMusic) state.ffmpeg.FS('unlink', 'bgMusic.mp3');
-  state.ffmpeg.FS('unlink', 'output.mp4');
+  progress.textContent = 'Video downloaded!';
+  setTimeout(() => (progress.className = 'progress-indicator'), 2000);
 }
 
 /* --------------------------------------------------------------
@@ -1068,7 +991,9 @@ function downloadBlob(blob, filename) {
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 100);
 }
 
@@ -1078,29 +1003,14 @@ function downloadBlob(blob, filename) {
 function cancelProcessing() {
   state.pauseRequested = true;
   document.getElementById('progressIndicator').textContent = 'Cancelling…';
-  // No web‑worker is used here – the loops check `state.pauseRequested`
 }
 
 function pauseProcessing() {
-  state.pauseRequested = true;
-  const btn = document.getElementById('pauseBtn');
-  btn.textContent = 'Resume';
-  btn.onclick = resumeProcessing;
-  document.getElementById('progressIndicator').textContent = 'Paused';
+    alert("Pause/Resume is not supported with this export method. Please cancel and restart.");
 }
 
 function resumeProcessing() {
-  state.pauseRequested = false;
-  const btn = document.getElementById('pauseBtn');
-  btn.textContent = 'Pause';
-  btn.onclick = pauseProcessing;
-  document.getElementById('progressIndicator').textContent = 'Resuming…';
-  // Simple approach: restart the last operation
-  setTimeout(() => {
-    if (state.currentLang && state.currentType) {
-      downloadBanner(state.currentLang, state.currentType);
-    }
-  }, 500);
+    // This function is kept for UI consistency but is not functional in this version.
 }
 </script>
 </body>
