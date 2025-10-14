@@ -3,110 +3,581 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Enhanced InfoMela Studio</title>
+  <title>Enhanced InfoMela Studio - High Quality Output</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Noto+Sans+Bengali:wght@600;700&display=swap" rel="stylesheet" />
   <style>
-    /* Existing Styles Here */
-    /*...*/
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 30px;
+      color: #fff;
+    }
+    .main-container {
+      max-width: 1600px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 400px 1fr;
+      gap: 40px;
+    }
+    .control-panel {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 35px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      position: sticky;
+      top: 30px;
+      max-height: 95vh;
+      overflow-y: auto;
+    }
+    .control-panel h1 { color: #667eea; font-size: 1.8rem; margin-bottom: 10px; font-weight: 800; }
+    .control-panel p { color: #666; margin-bottom: 30px; font-size: 0.95rem; }
+    .form-group { margin-bottom: 25px; }
+    .form-group label {
+      display: block; color: #333; font-weight: 700; margin-bottom: 10px; font-size: 0.95rem;
+    }
+    .form-group input[type="date"],
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 14px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: all 0.3s;
+      background: #f9f9f9;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #667eea;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+    .form-group textarea { min-height: 80px; resize: vertical; }
+    .upload-box {
+      border: 3px dashed #667eea;
+      border-radius: 15px;
+      padding: 30px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: #f0f4ff;
+    }
+    .upload-box:hover { background: #e6edff; border-color: #5568d3; transform: translateY(-2px); }
+    .upload-icon { font-size: 3rem; margin-bottom: 10px; color: #667eea; }
+    .upload-text { color: #667eea; font-weight: 600; font-size: 1rem; }
+    .file-info { margin-top: 10px; font-size: 0.85rem; color: #666; }
+    .video-options {
+      background: #f0f4ff;
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 15px;
+    }
+    .video-options h4 { color: #667eea; margin-bottom: 12px; font-size: 0.95rem; }
+    .option-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .option-row label { color: #333; font-weight: 600; font-size: 0.9rem; }
+    .option-row input,
+    .option-row select { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
+    .btn-section {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 2px solid #e0e0e0;
+    }
+    .btn-section h3 {
+      color: #333;
+      font-size: 1.1rem;
+      margin-bottom: 15px;
+      font-weight: 700;
+    }
+    .btn-download {
+      width: 100%;
+      padding: 18px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 15px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .btn-english {
+      background: linear-gradient(135deg, #eb4141 0%, #a50000 100%);
+      color: white;
+      box-shadow: 0 10px 30px rgba(171, 0, 0, 0.35);
+    }
+    .btn-bangla {
+      background: linear-gradient(135deg, #ff9156 0%, #ff2b2b 100%);
+      color: white;
+      box-shadow: 0 10px 30px rgba(255, 58, 58, 0.4);
+    }
+    .btn-video {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    }
+    .btn-download:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    }
+    .btn-download:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .preview-section { display: flex; flex-direction: column; gap: 40px; }
+    .preview-container {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      color: #000;
+    }
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    .preview-header h2 { color: #333; font-size: 1.5rem; font-weight: 700; }
+    .lang-badge {
+      background: linear-gradient(135deg, #eb4141 0%, #a50000 100%);
+      color: white;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+    .lang-badge.bangla {
+      background: linear-gradient(135deg, #ff9156 0%, #ff2b2b 100%);
+    }
+    .banner-wrapper {
+      margin: 0 auto;
+      padding: 18px;
+      background: #f7f7f7;
+      border-radius: 22px;
+      border: 12px solid #d32f2f;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+      transition: all 0.3s;
+      width: 100%;
+      max-width: 720px;
+    }
+    .banner {
+      width: 100%;
+      min-height: 520px;
+      position: relative;
+      background: #ffffff;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 3px solid rgba(211, 47, 47, 0.6);
+      display: flex;
+      flex-direction: column;
+    }
+    .top-strip {
+      background: linear-gradient(90deg, rgba(211, 47, 47, 1) 0%, rgba(166, 0, 0, 1) 100%);
+      color: white;
+      padding: 18px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 2;
+    }
+    .brand-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      font-size: 1.25rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .brand-logo {
+      max-width: 110px;
+      max-height: 48px;
+      filter: brightness(0.92);
+      opacity: 0.95;
+    }
+    .slogan { font-size: 0.9rem; color: rgba(255, 255, 255, 0.9); font-weight: 500; }
+    .date-badge {
+      background: rgba(255, 255, 255, 0.18);
+      padding: 8px 18px;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.5px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .image-panel {
+      position: relative;
+      flex-grow: 1;
+      margin: 18px 28px;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 6px solid rgba(211, 47, 47, 0.85);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .image-panel img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #111;
+      filter: brightness(1.05) contrast(1.08) saturate(1.05);
+    }
+    .image-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.12) 0%, rgba(0, 0, 0, 0.4) 100%);
+    }
+    .headline-area {
+      margin: 0 28px 18px;
+      padding: 18px 22px;
+      background: #fff;
+      border-radius: 12px;
+      border: 1px solid rgba(211, 47, 47, 0.35);
+      box-shadow: 0 10px 18px rgba(0, 0, 0, 0.1);
+    }
+    .headline-text {
+      color: #c80000;
+      font-weight: 800;
+      line-height: 1.45;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      transition: font-size 0.2s ease;
+      font-family: inherit;
+    }
+    .cta-ribbon {
+      margin: 0 28px 20px;
+      padding: 14px 26px;
+      background: linear-gradient(90deg, rgba(211, 47, 47, 1) 0%, rgba(166, 0, 0, 1) 100%);
+      color: white;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(211, 47, 47, 0.45);
+    }
+    .cta-ribbon.hidden { display: none; }
+    .footer-bar {
+      background: #222;
+      padding: 16px 15px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 18px;
+      border-top: 3px solid rgba(211, 47, 47, 0.8);
+      flex-wrap: wrap;
+    }
+    .social-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: white;
+    }
+    .social-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #fff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+    .icon-facebook { background: #1877F2; }
+    .icon-twitter { background: #000; }
+    .icon-youtube { background: #FF0000; }
+    .icon-instagram {
+      background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    }
+    .bangla-text { font-family: 'Noto Sans Bengali', sans-serif; }
+    .progress-indicator {
+      margin-top: 15px;
+      padding: 12px;
+      background: #f0f4ff;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #667eea;
+      font-weight: 600;
+      display: none;
+    }
+    .progress-indicator.active { display: block; }
+    .advanced-toggle {
+      margin-top: 22px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      background: #f0f4ff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .advanced-toggle:hover { background: #e6edff; }
+    .advanced-content { display: none; margin-top: 16px; }
+    .advanced-content.active { display: block; }
+    .range-row {
+      margin-bottom: 14px;
+    }
+    .range-row label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #333;
+    }
+    .range-row input[type="range"] { width: 100%; }
+    .color-picker {
+      width: 100%;
+      height: 42px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      padding: 0;
+    }
+    .quality-options {
+      background: #f0f4ff;
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 15px;
+    }
+    .quality-options h4 { color: #667eea; margin-bottom: 12px; font-size: 0.95rem; }
+    @media (max-width: 1200px) {
+      .main-container { grid-template-columns: 1fr; }
+      .control-panel { position: static; max-height: none; }
+    }
   </style>
 </head>
-
 <body>
 <div class="main-container">
   <div class="control-panel">
-    <h1>🎬 InfoMela Studio</h1>
-    <p>Create customized banners and looping videos with your unique style!</p>
+    <h1>🎬 Enhanced InfoMela Studio</h1>
+    <p>Dynamic banners and smooth 30–120s videos, without chopping your photos.</p>
 
     <div class="form-group">
-      <label>Date</label>
-      <input type="date" id="bannerDate"/>
+      <label>📅 Date</label>
+      <input type="date" id="bannerDate" />
     </div>
 
     <div class="form-group">
-      <label>Platform Ratio</label>
+      <label>🎥 Platform Ratio</label>
       <select id="platformSelect">
-        <option value="fb-square">Facebook Square (1:1)</option>
-        <option value="youtube">YouTube Landscape (16:9)</option>
-        <option value="ig-story">Instagram Story (9:16)</option>
+        <option value="fb-square">Facebook - Square (1:1)</option>
+        <option value="fb-landscape">Facebook - Landscape (16:9)</option>
+        <option value="fb-portrait">Facebook - Portrait (4:5)</option>
+        <option value="twitter-landscape">Twitter/X - Landscape (16:9)</option>
+        <option value="twitter-square">Twitter/X - Square (1:1)</option>
+        <option value="ig-feed">Instagram - Feed (1:1)</option>
+        <option value="ig-portrait">Instagram - Portrait (4:5)</option>
+        <option value="ig-story">Instagram - Story/Reel (9:16)</option>
+        <option value="youtube">YouTube - Standard (16:9)</option>
       </select>
     </div>
 
     <div class="form-group">
-      <label>Logo Upload</label>
+      <label>🖼️ Logo Upload</label>
       <div class="upload-box" onclick="document.getElementById('logoInput').click()">
-        <input type="file" id="logoInput" accept="image/*" style="display:none;"/>
+        <input type="file" id="logoInput" accept="image/*" />
         <div class="upload-icon">📷</div>
-        <div class="file-info" id="logoInfo">PNG/SVG recommended</div>
+        <div class="upload-text">Click to upload logo</div>
+        <div class="file-info" id="logoInfo">PNG or SVG recommended</div>
       </div>
     </div>
 
     <div class="form-group">
-      <label>Headline Image</label>
+      <label>📸 Headline Image</label>
       <div class="upload-box" onclick="document.getElementById('imageInput').click()">
-        <input type="file" id="imageInput" accept="image/*" style="display:none;"/>
+        <input type="file" id="imageInput" accept="image/*" />
         <div class="upload-icon">🖼️</div>
-        <div class="file-info" id="imageInfo">Click to upload</div>
+        <div class="upload-text">Click to upload photo</div>
+        <div class="file-info" id="imageInfo">Preview updates instantly</div>
       </div>
     </div>
 
     <div class="form-group">
-      <label>English Headline</label>
+      <label>✍️ English Headline</label>
       <textarea id="captionEN">HASINA BUILT A MOSQUE IN DHAKA; WHAT WOULD BNP DO?</textarea>
     </div>
 
     <div class="form-group">
-      <label>বাংলা শিরোনাম</label>
-      <textarea id="captionBN" class="bangla-text">হাসিনা ঢাকায় মসজিদ তৈরি করেছে; বিএনপি কী করবে?</textarea>
+      <label>✍️ বাংলা শিরোনাম</label>
+      <textarea id="captionBN" class="bangla-text">হাসিনা সৌদি ফেরত ঢাকায় মসজিদ তৈরি করেছে; বিএনপি ক্ষমতায় গেলে মন্দির তৈরি করবে?</textarea>
     </div>
 
-    <div class="form-group">
-      <label>Video Duration (30–120s)</label>
-      <input type="number" id="videoDuration" min="30" max="120" value="60"/>
-    </div>
-    <div class="form-group">
-      <label>Zoom Intensity (0–30)</label>
-      <input type="range" id="zoomEffect" min="0" max="30" step="1" value="5"/>
+    <div class="video-options">
+      <h4>🎬 Video Settings</h4>
+      <div class="option-row">
+        <label for="videoDuration">Duration (seconds)</label>
+        <input type="number" id="videoDuration" min="30" max="120" value="60" />
+      </div>
+      <div class="option-row">
+        <label for="fps">Frame Rate</label>
+        <select id="fps">
+          <option value="24">24 FPS</option>
+          <option value="30" selected>30 FPS</option>
+          <option value="60">60 FPS</option>
+        </select>
+      </div>
     </div>
 
-    <div class="btn-download btn-english" onclick="downloadBanner('english','image')">Download English Image</div>
-    <div class="btn-download btn-bangla" onclick="downloadBanner('bangla','image')">বাংলা ছবি ডাউনলোড</div>
-    <div class="btn-download btn-video" id="btnVideoEN" onclick="downloadBanner('english','video')">🎥 Download English Video</div>
-    <div class="btn-download btn-video" id="btnVideoBN" onclick="downloadBanner('bangla','video')">🎥 বাংলা ভিডিও ডাউনলোড</div>
-    <div class="progress-indicator" id="progressIndicator"></div>
+    <div class="quality-options">
+      <h4>🔥 Quality Settings</h4>
+      <div class="option-row">
+        <label for="quality">Output Quality</label>
+        <select id="quality">
+          <option value="high" selected>High Quality (Recommended)</option>
+          <option value="standard">Standard Quality</option>
+        </select>
+      </div>
+      <div class="option-row">
+        <label for="zoomEffect">Zoom Intensity</label>
+        <input type="range" id="zoomEffect" min="0" max="30" step="1" value="5" />
+      </div>
+      <div class="option-row">
+        <label for="animationSpeed">Animation Speed</label>
+        <input type="range" id="animationSpeed" min="0.5" max="3" step="0.1" value="0.7" />
+      </div>
+    </div>
+
+    <div class="advanced-toggle" onclick="toggleAdvancedOptions()">
+      <span>⚙️ Advanced Animations</span>
+      <span id="advancedArrow">▼</span>
+    </div>
+    <div class="advanced-content" id="advancedContent">
+      <div class="range-row">
+        <label for="bgColor">Banner Background</label>
+        <input type="color" id="bgColor" class="color-picker" value="#ffffff" />
+      </div>
+    </div>
+
+    <div class="btn-section">
+      <h3>📥 Download Static Images</h3>
+      <button class="btn-download btn-english" onclick="downloadBanner('english','image')">Download English Image</button>
+      <button class="btn-download btn-bangla" onclick="downloadBanner('bangla','image')">বাংলা ছবি ডাউনলোড করুন</button>
+    </div>
+
+    <div class="btn-section">
+      <h3>🎬 Download Videos</h3>
+      <button class="btn-download btn-video" id="btnVideoEN" onclick="downloadBanner('english','video')">🎥 Download English Video</button>
+      <button class="btn-download btn-video" id="btnVideoBN" onclick="downloadBanner('bangla','video')">🎥 বাংলা ভিডিও ডাউনলোড করুন</button>
+      <div class="progress-indicator" id="progressIndicator">Generating video…</div>
+    </div>
   </div>
 
-  <!-- PREVIEW -->
   <div class="preview-section">
     <div class="preview-container">
-      <h2>English Preview</h2>
-      <div class="banner-wrapper" id="wrapperEN">
+      <div class="preview-header">
+        <h2>English Preview</h2>
+        <span class="lang-badge">ENGLISH</span>
+      </div>
+      <div class="banner-wrapper">
         <div class="banner" id="bannerEN">
-          <div class="top-strip"><div class="brand-area"><img id="logoEN" class="brand-logo" src="" alt="Logo"/><span class="slogan">News. Fun. Facts.</span></div><div id="dateEN"></div></div>
-          <div class="image-panel"><img id="bgImageEN" src="" alt=""/></div>
-          <div class="headline-area"><div id="captionDisplayEN" class="headline-text"></div></div>
-          <div class="cta-ribbon" id="ctaEN">DETAILS BELOW</div>
+          <div class="top-strip">
+            <div class="brand-area">
+              <img class="brand-logo" id="logoEN" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='48' viewBox='0 0 200 80'%3E%3Crect fill='%23ffffff' width='200' height='80' rx='10'/%3E%3Ctext x='100' y='50' font-family='Arial' font-size='32' font-weight='bold' fill='%23d32f2f' text-anchor='middle'%3EInfoMela%3C/text%3E%3C/svg%3E" alt="Logo" />
+              <span class="slogan">News.Fun.Facts</span>
+            </div>
+            <div class="date-badge" id="dateEN">14 OCTOBER 2025</div>
+          </div>
+
+          <div class="image-panel">
+            <img id="bgImageEN" src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80" alt="Headline visual" />
+            <div class="image-overlay"></div>
+          </div>
+
+          <div class="headline-area">
+            <div class="headline-text" id="captionDisplayEN"></div>
+          </div>
+
+          <div class="cta-ribbon" id="ctaEN">DETAILS IN COMMENTS</div>
+
           <div class="footer-bar">
-            <div class="social-item"><div class="social-icon icon-facebook">f</div><span>@theinfomelaa</span></div>
-            <div class="social-item"><div class="social-icon icon-twitter">𝕏</div><span>@theinfomela</span></div>
-            <div class="social-item"><div class="social-icon icon-youtube">▶</div><span>@theinfomela</span></div>
-            <div class="social-item"><div class="social-icon icon-instagram">⧉</div><span>@theinfomela</span></div>
+            <div class="social-item">
+              <div class="social-icon icon-facebook">f</div>
+              <span>@theinfomelaa</span>
+            </div>
+            <div class="social-item">
+              <div class="social-icon icon-twitter">𝕏</div>
+              <span>@theinfomela</span>
+            </div>
+            <div class="social-item">
+              <div class="social-icon icon-youtube">▶</div>
+              <span>@theinfomela</span>
+            </div>
+            <div class="social-item">
+              <div class="social-icon icon-instagram">⧉</div>
+              <span>@theinfomela</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
+
     <div class="preview-container">
-      <h2>বাংলা প্রিভিউ</h2>
-      <div class="banner-wrapper" id="wrapperBN">
+      <div class="preview-header">
+        <h2>বাংলা প্রিভিউ</h2>
+        <span class="lang-badge bangla">বাংলা</span>
+      </div>
+      <div class="banner-wrapper">
         <div class="banner bangla-text" id="bannerBN">
-          <div class="top-strip"><div class="brand-area"><img id="logoBN" class="brand-logo" src="" alt="Logo"/><span class="slogan">খবর. মজা. তথ্য.</span></div><div id="dateBN"></div></div>
-          <div class="image-panel"><img id="bgImageBN" src="" alt=""/></div>
-          <div class="headline-area"><div id="captionDisplayBN" class="headline-text"></div></div>
-          <div class="cta-ribbon" id="ctaBN">বিস্তারিত নিচে</div>
+          <div class="top-strip">
+            <div class="brand-area">
+              <img class="brand-logo" id="logoBN" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='48' viewBox='0 0 200 80'%3E%3Crect fill='%23ffffff' width='200' height='80' rx='10'/%3E%3Ctext x='100' y='50' font-family='Arial' font-size='32' font-weight='bold' fill='%23d32f2f' text-anchor='middle'%3Eইনফো মেলা%3C/text%3E%3C/svg%3E" alt="Logo" />
+              <span class="slogan">খবর.মজা.তথ্য</span>
+            </div>
+            <div class="date-badge" id="dateBN">১৪ অক্টোবর ২০২৫</div>
+          </div>
+
+          <div class="image-panel">
+            <img id="bgImageBN" src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80" alt="Headline visual" />
+            <div class="image-overlay"></div>
+          </div>
+
+          <div class="headline-area">
+            <div class="headline-text" id="captionDisplayBN"></div>
+          </div>
+
+          <div class="cta-ribbon" id="ctaBN">বিস্তারিত কমেন্টে</div>
+
           <div class="footer-bar">
-            <div class="social-item"><div class="social-icon icon-facebook">f</div><span>@theinfomelaa</span></div>
-            <div class="social-item"><div class="social-icon icon-twitter">𝕏</div><span>@theinfomela</span></div>
-            <div class="social-item"><div class="social-icon icon-youtube">▶</div><span>@theinfomela</span></div>
-            <div class="social-item"><div class="social-icon icon-instagram">⧉</div><span>@theinfomela</span></div>
+            <div class="social-item">
+              <div class="social-icon icon-facebook">f</div>
+              <span>@theinfomelaa</span>
+            </div>
+            <div class="social-item">
+              <div class="social-icon icon-twitter">𝕏</div>
+              <span>@theinfomela</span>
+            </div>
+            <div class="social-item">
+              <div class="social-icon icon-youtube">▶</div>
+              <span>@theinfomela</span>
+            </div>
+            <div class="social-item">
+              <div class="social-icon icon-instagram">⧉</div>
+              <span>@theinfomela</span>
+            </div>
           </div>
         </div>
       </div>
@@ -115,258 +586,455 @@
 </div>
 
 <!-- html2canvas -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaUMjj0CtbE6LdCRKB8Qda/AB9ERSNmxdEXs41Rj3UvK8cfehYSCZ1LJTVS3grF2pLgtz3R6uPYp4DS9O5mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <script>
-const PLATFORM_RATIOS = {
-  'fb-square': { width:1080, height:1080 },
-  'youtube': { width:1920, height:1080 },
-  'ig-story': { width:1080, height:1920 }
-};
-const state = { backgroundColor: '#fff', logoURL: null, photoURL: null };
-const videoConfig = { duration: 60, fps: 30, zoomEffect: 5 };
-
-document.addEventListener('DOMContentLoaded', () => {
-  const today = new Date(); document.getElementById('bannerDate').value = today.toISOString().split('T')[0];
-  updateDate(); updateCaptions();
-  document.getElementById('bannerDate').addEventListener('change', updateDate);
-  document.getElementById('captionEN').addEventListener('input', updateCaptions);
-  document.getElementById('captionBN').addEventListener('input', updateCaptions);
-  document.getElementById('logoInput').addEventListener('change', handleLogoUpload);
-  document.getElementById('imageInput').addEventListener('change', handleImageUpload);
-  document.getElementById('videoDuration').addEventListener('input', e => {
-    videoConfig.duration = Math.min(120, Math.max(30, Number(e.target.value)));
-  });
-  document.getElementById('zoomEffect').addEventListener('input', e => {
-    videoConfig.zoomEffect = Number(e.target.value);
-  });
-});
-
-function updateDate() {
-  const val = document.getElementById('bannerDate').value; if (!val) return;
-  const date = new Date(val);
-  document.getElementById('dateEN').textContent = date.toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }).toUpperCase();
-  document.getElementById('dateBN').textContent = `${date.getDate()} অক্টোবর ${date.getFullYear()}`;
-}
-
-function updateCaptions() {
-  document.getElementById('captionDisplayEN').textContent = document.getElementById('captionEN').value;
-  document.getElementById('captionDisplayBN').textContent = document.getElementById('captionBN').value;
-  adjustFontSize('captionDisplayEN', document.getElementById('captionEN').value.length);
-  adjustFontSize('captionDisplayBN', document.getElementById('captionBN').value.length);
-  updatePlatformRatio();
-}
-
-function adjustFontSize(elementId, length) {
-  const el = document.getElementById(elementId);
-  const baseSize = 1.6;
-  const size = Math.max(1.2, baseSize - (length / 150));
-  el.style.fontSize = `${size}rem`;
-}
-
-function handleLogoUpload(e) {
-  const file = e.target.files[0]; if (!file) return;
-  if (state.logoURL) URL.revokeObjectURL(state.logoURL);
-  state.logoURL = URL.createObjectURL(file);
-  document.getElementById('logoInfo').textContent = file.name;
-  document.getElementById('logoEN').src = state.logoURL;
-  document.getElementById('logoBN').src = state.logoURL;
-  extractDominantColor(state.logoURL);
-}
-
-function handleImageUpload(e) {
-  const file = e.target.files[0]; if (!file) return;
-  if (state.photoURL) URL.revokeObjectURL(state.photoURL);
-  state.photoURL = URL.createObjectURL(file);
-  document.getElementById('imageInfo').textContent = file.name;
-  document.getElementById('bgImageEN').src = state.photoURL;
-  document.getElementById('bgImageBN').src = state.photoURL;
-}
-
-function extractDominantColor(src) {
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.onload = () => {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = img.width;
-    canvas.height = img.height;
-    ctx.drawImage(img, 0, 0);
-    const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-    let r = 0, g = 0, b = 0, count = 0;
-
-    for (let i = 0; i < data.length; i += 4) {
-      if (data[i + 3] > 120) {
-        r += data[i];
-        g += data[i + 1];
-        b += data[i + 2];
-        count++;
-      }
-    }
-    if (!count) return;
-
-    r = Math.round(r / count);
-    g = Math.round(g / count);
-    b = Math.round(b / count);
-    const hex = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
-    applyBrandColor(hex);
+  // Platform canvas sizes
+  const PLATFORM_RATIOS = {
+    'fb-square': { width: 1080, height: 1080 },
+    'fb-landscape': { width: 1280, height: 720 },
+    'fb-portrait': { width: 1080, height: 1350 },
+    'twitter-landscape': { width: 1280, height: 720 },
+    'twitter-square': { width: 1080, height: 1080 },
+    'ig-feed': { width: 1080, height: 1080 },
+    'ig-portrait': { width: 1080, height: 1350 },
+    'ig-story': { width: 1080, height: 1920 },
+    'youtube': { width: 1920, height: 1080 }
   };
-  img.src = src;
-}
 
-function applyBrandColor(color) {
-  const darker = shadeColor(color, -35);
-  const lighter = shadeColor(color, -15);
+  const state = {
+    backgroundColor: '#ffffff',
+    logoObjectURL: null,
+    photoObjectURL: null,
+    quality: 'high'
+  };
 
-  document.querySelectorAll('.banner-wrapper').forEach(wrapper => wrapper.style.borderColor = color);
-  document.querySelectorAll('.top-strip').forEach(el => el.style.background = `linear-gradient(90deg, ${color} 0%, ${darker} 100%)`);
-  document.querySelectorAll('.cta-ribbon').forEach(el => el.style.background = `linear-gradient(90deg, ${color} 0%, ${darker} 100%)`);
-  document.querySelectorAll('.headline-area').forEach(el => el.style.borderColor = `${color}55`);
-  document.querySelectorAll('.headline-text').forEach(el => el.style.color = lighter);
-  document.querySelectorAll('.image-panel').forEach(el => el.style.borderColor = `${color}DD`);
-  document.querySelectorAll('.footer-bar').forEach(el => el.style.borderTopColor = `${color}CC`);
-}
+  const videoConfig = {
+    duration: 60,
+    fps: 30,
+    animationSpeed: 0.7,
+    zoomEffect: 5
+  };
 
-function shadeColor(color, percent) {
-  const num = parseInt(color.slice(1), 16);
-  const amt = Math.round(2.55 * percent);
-  const R = Math.min(255, Math.max(0, (num >> 16) + amt));
-  const G = Math.min(255, Math.max(0, (num >> 8 & 0x00ff) + amt));
-  const B = Math.min(255, Math.max(0, (num & 0x0000ff) + amt));
-  return `#${(R << 16 | G << 8 | B).toString(16).padStart(6, '0').toUpperCase()}`;
-}
+  document.addEventListener('DOMContentLoaded', () => {
+    const today = new Date();
+    document.getElementById('bannerDate').value = today.toISOString().split('T')[0];
+    updateDate();
+    updateCaptions();
 
-function updatePlatformRatio() {
-  const platform = document.getElementById('platformSelect').value;
-  const ratio = PLATFORM_RATIOS[platform];
-  const baseWidth = 700;
+    document.getElementById('bannerDate').addEventListener('change', updateDate);
+    document.getElementById('platformSelect').addEventListener('change', updatePlatformRatio);
+    document.getElementById('captionEN').addEventListener('input', updateCaptions);
+    document.getElementById('captionBN').addEventListener('input', updateCaptions);
 
-  document.querySelectorAll('.banner-wrapper').forEach(wrapper => {
-    const banner = wrapper.querySelector('.banner');
-    const ratioHeight = Math.round((ratio.height / ratio.width) * baseWidth);
-    const contentHeight = banner.scrollHeight + 40;
-    wrapper.style.width = `${baseWidth}px`;
-    wrapper.style.height = `${Math.max(ratioHeight, contentHeight)}px`;
+    document.getElementById('logoInput').addEventListener('change', handleLogoUpload);
+    document.getElementById('imageInput').addEventListener('change', handleImageUpload);
+
+    document.getElementById('videoDuration').addEventListener('change', e => {
+      const val = Math.max(30, Math.min(120, Number(e.target.value) || 60));
+      videoConfig.duration = val;
+      e.target.value = val;
+    });
+
+    document.getElementById('fps').addEventListener('change', e => {
+      videoConfig.fps = Number(e.target.value);
+    });
+
+    document.getElementById('animationSpeed').addEventListener('input', e => {
+      videoConfig.animationSpeed = Number(e.target.value);
+    });
+
+    document.getElementById('zoomEffect').addEventListener('input', e => {
+      videoConfig.zoomEffect = Number(e.target.value);
+    });
+
+    document.getElementById('quality').addEventListener('change', e => {
+      state.quality = e.target.value;
+    });
+
+    document.getElementById('bgColor').addEventListener('input', e => {
+      state.backgroundColor = e.target.value;
+      document.querySelectorAll('.banner').forEach(banner => {
+        banner.style.backgroundColor = state.backgroundColor;
+      });
+    });
+
+    updatePlatformRatio();
   });
-}
 
-async function downloadBanner(lang, type) {
-  const wrapperId = lang === 'english' ? 'wrapperEN' : 'wrapperBN';
-  const bannerId = lang === 'english' ? 'bannerEN' : 'bannerBN';
-  const platform = document.getElementById('platformSelect').value;
-  const ratio = PLATFORM_RATIOS[platform];
-  const banner = document.getElementById(bannerId);
-
-  if (type === 'video') document.getElementById(wrapperId).classList.add('hidden');
-
-  try {
-    if (type === 'image') {
-      await downloadImage(banner, lang, ratio);
-    } else {
-      await downloadVideo(banner, lang, ratio);
-    }
-  } finally {
-    if (type === 'video') document.getElementById(wrapperId).classList.remove('hidden');
+  function toggleAdvancedOptions() {
+    const content = document.getElementById('advancedContent');
+    const arrow = document.getElementById('advancedArrow');
+    content.classList.toggle('active');
+    arrow.textContent = content.classList.contains('active') ? '▲' : '▼';
   }
-}
 
-async function downloadImage(banner, lang, ratio) {
-  try {
-    banner.querySelectorAll('img').forEach(img => { if (img.src.startsWith('http')) img.crossOrigin = 'anonymous'; });
-    const canvas = await html2canvas(banner, { scale: 4, backgroundColor: state.backgroundColor, useCORS: true });
-    const finalCanvas = document.createElement('canvas');
-    finalCanvas.width = ratio.width * 2;
-    finalCanvas.height = ratio.height * 2;
-    const ctx = finalCanvas.getContext('2d');
-    ctx.fillStyle = state.backgroundColor;
-    ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
-    ctx.drawImage(canvas, 0, 0, finalCanvas.width, finalCanvas.height);
-    const link = document.createElement('a');
-    link.download = `InfoMela_${lang}_${Date.now()}.png`;
-    link.href = finalCanvas.toDataURL('image/png', 1.0);
-    link.click();
-  } catch (err) {
-    console.error(err);
-    alert('Image download failed. Try using local or same-origin images.');
+  function updateDate() {
+    const dateStr = document.getElementById('bannerDate').value;
+    if (!dateStr) return;
+    const date = new Date(dateStr + 'T00:00:00');
+
+    const enOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('dateEN').textContent = date.toLocaleDateString('en-GB', enOptions).toUpperCase();
+
+    const bnMonths = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
+    const bnDay = date.getDate();
+    const bnMonth = bnMonths[date.getMonth()];
+    const bnYear = date.getFullYear();
+    document.getElementById('dateBN').textContent = `${bnDay} ${bnMonth} ${bnYear}`;
   }
-}
 
-async function downloadVideo(banner, lang, ratio) {
-  const progress = document.getElementById('progressIndicator');
-  const btnEN = document.getElementById('btnVideoEN');
-  const btnBN = document.getElementById('btnVideoBN');
+  function updateCaptions() {
+    const en = document.getElementById('captionEN').value.trim();
+    const bn = document.getElementById('captionBN').value.trim();
 
-  btnEN.disabled = true;
-  btnBN.disabled = true;
-  progress.classList.add('active');
-  progress.textContent = 'Rendering video…';
+    document.getElementById('captionDisplayEN').textContent = en;
+    document.getElementById('captionDisplayBN').textContent = bn;
 
-  try {
-    const snapshot = await html2canvas(banner, { scale: 4, backgroundColor: '#fff', useCORS: true });
-    const image = await canvasToImage(snapshot);
-    const canvas = document.createElement('canvas');
-    canvas.width = ratio.width * 2;
-    canvas.height = ratio.height * 2;
-    const ctx = canvas.getContext('2d');
-    const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp8') ? 'video/webm;codecs=vp8' : 'video/webm';
-    const stream = canvas.captureStream(videoConfig.fps);
-    const recorder = new MediaRecorder(stream, { mimeType: mime });
-    const chunks = [];
-    recorder.ondataavailable = e => e.data.size && chunks.push(e.data);
+    adjustFontSize('captionDisplayEN', en.length);
+    adjustFontSize('captionDisplayBN', bn.length);
 
-    const totalFrames = Math.floor(videoConfig.duration * videoConfig.fps);
-    recorder.start();
-    let frame = 0;
-
-    function drawFrame() {
-      const p = (frame % totalFrames) / totalFrames;
-      drawAnimatedFrame(ctx, image, canvas.width, canvas.height, p);
-      frame++;
-      if (frame < totalFrames) setTimeout(drawFrame, 1000 / videoConfig.fps);
-      else recorder.stop();
-    }
-
-    drawFrame();
-    await new Promise(r => recorder.onstop = r);
-
-    const blob = new Blob(chunks, { type: mime });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `InfoMela_${lang}_${Date.now()}.webm`;
-    a.click();
-    URL.revokeObjectURL(url);
-  } catch (err) {
-    console.error(err);
-    alert('Video generation failed.');
-  } finally {
-    progress.classList.remove('active');
-    btnEN.disabled = false;
-    btnBN.disabled = false;
+    updatePlatformRatio();
   }
-}
 
-function drawAnimatedFrame(ctx, img, w, h, p) {
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(0, 0, w, h);
-  const zoom = 1 + (Math.sin(p * Math.PI * 2) * (videoConfig.zoomEffect / 100));
-  const offsetX = Math.sin(p * Math.PI) * 10;
-  const offsetY = Math.cos(p * Math.PI) * 5;
-  ctx.save();
-  ctx.translate(w / 2 + offsetX, h / 2 + offsetY);
-  ctx.scale(zoom, zoom);
-  ctx.drawImage(img, -w / 2, -h / 2, w, h);
-  ctx.restore();
-}
+  function adjustFontSize(elementId, length) {
+    const el = document.getElementById(elementId);
+    const base = 1.6;
+    const size = Math.max(1.2, base - (length / 150));
+    el.style.fontSize = `${size}rem`;
+  }
 
-function canvasToImage(canvas) {
-  return new Promise(res => {
+  function handleLogoUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    document.getElementById('logoInfo').textContent = file.name;
+
+    if (state.logoObjectURL) URL.revokeObjectURL(state.logoObjectURL);
+    const objectURL = URL.createObjectURL(file);
+    state.logoObjectURL = objectURL;
+
+    document.getElementById('logoEN').src = objectURL;
+    document.getElementById('logoBN').src = objectURL;
+
+    extractDominantColor(objectURL);
+  }
+
+  function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    document.getElementById('imageInfo').textContent = file.name;
+
+    if (state.photoObjectURL) URL.revokeObjectURL(state.photoObjectURL);
+    const objectURL = URL.createObjectURL(file);
+    state.photoObjectURL = objectURL;
+
+    enhanceAndSetImage(objectURL, 'bgImageEN');
+    enhanceAndSetImage(objectURL, 'bgImageBN');
+  }
+
+  function enhanceAndSetImage(src, elementId) {
     const img = new Image();
-    img.onload = () => res(img);
-    img.src = canvas.toDataURL('image/png');
-  });
-}
-</script>
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.filter = 'brightness(1.08) contrast(1.08) saturate(1.05)';
+      ctx.drawImage(img, 0, 0);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+      document.getElementById(elementId).src = dataUrl;
+      updatePlatformRatio();
+    };
+    img.src = src;
+  }
 
+  function extractDominantColor(src) {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+      let r = 0, g = 0, b = 0, count = 0;
+
+      for (let i = 0; i < data.length; i += 4) {
+        if (data[i + 3] > 120) {
+          r += data[i];
+          g += data[i + 1];
+          b += data[i + 2];
+          count++;
+        }
+      }
+      if (!count) return;
+
+      r = Math.round(r / count);
+      g = Math.round(g / count);
+      b = Math.round(b / count);
+      const hex = '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+      applyBrandColor(hex);
+    };
+    img.src = src;
+  }
+
+  function applyBrandColor(color) {
+    document.querySelectorAll('.banner-wrapper').forEach(wrapper => {
+      wrapper.style.borderColor = color;
+    });
+
+    const darker = shadeColor(color, -35);
+    const lighter = shadeColor(color, -15);
+
+    document.querySelectorAll('.top-strip').forEach(el => {
+      el.style.background = `linear-gradient(90deg, ${color} 0%, ${darker} 100%)`;
+    });
+    document.querySelectorAll('.cta-ribbon').forEach(el => {
+      el.style.background = `linear-gradient(90deg, ${color} 0%, ${darker} 100%)`;
+    });
+    document.querySelectorAll('.headline-area').forEach(el => {
+      el.style.borderColor = `${color}55`;
+    });
+    document.querySelectorAll('.headline-text').forEach(el => {
+      el.style.color = lighter;
+    });
+    document.querySelectorAll('.image-panel').forEach(el => {
+      el.style.borderColor = `${color}DD`;
+    });
+    document.querySelectorAll('.footer-bar').forEach(el => {
+      el.style.borderTopColor = `${color}CC`;
+    });
+  }
+
+  function shadeColor(color, percent) {
+    let R = parseInt(color.slice(1, 3), 16);
+    let G = parseInt(color.slice(3, 5), 16);
+    let B = parseInt(color.slice(5, 7), 16);
+
+    R = Math.max(0, Math.min(255, R + (R * percent / 100)));
+    G = Math.max(0, Math.min(255, G + (G * percent / 100)));
+    B = Math.max(0, Math.min(255, B + (B * percent / 100)));
+
+    const RR = ((R.toString(16).length === 1) ? "0" + R.toString(16) : R.toString(16)).toUpperCase();
+    const GG = ((G.toString(16).length === 1) ? "0" + G.toString(16) : G.toString(16)).toUpperCase();
+    const BB = ((B.toString(16).length === 1) ? "0" + B.toString(16) : B.toString(16)).toUpperCase();
+
+    return `#${RR}${GG}${BB}`;
+  }
+
+  function updatePlatformRatio() {
+    const platform = document.getElementById('platformSelect').value;
+    const ratio = PLATFORM_RATIOS[platform];
+    const baseWidth = 700;
+
+    document.querySelectorAll('.banner-wrapper').forEach(wrapper => {
+      const banner = wrapper.querySelector('.banner');
+      wrapper.style.width = `${baseWidth}px`;
+      wrapper.style.height = 'auto';
+
+      const ratioHeight = Math.round((ratio.height / ratio.width) * baseWidth);
+      const contentHeight = banner.scrollHeight + 40;
+      wrapper.style.height = `${Math.max(ratioHeight, contentHeight)}px`;
+    });
+  }
+
+  async function downloadBanner(lang, type) {
+    const bannerId = lang === 'english' ? 'bannerEN' : 'bannerBN';
+    const ctaId = lang === 'english' ? 'ctaEN' : 'ctaBN';
+    const platform = document.getElementById('platformSelect').value;
+    const ratio = PLATFORM_RATIOS[platform];
+    const banner = document.getElementById(bannerId);
+    const cta = document.getElementById(ctaId);
+
+    if (type === 'video') cta.classList.add('hidden');
+
+    try {
+      if (type === 'image') {
+        await downloadImage(banner, lang, ratio);
+      } else {
+        await downloadVideo(banner, lang, ratio);
+      }
+    } finally {
+      if (type === 'video') cta.classList.remove('hidden');
+    }
+  }
+
+  async function downloadImage(banner, lang, ratio) {
+    try {
+      // Make all images CORS-safe
+      banner.querySelectorAll('img').forEach(img => {
+        if (img.src.startsWith('http')) img.crossOrigin = 'anonymous';
+      });
+
+      // Higher scale for higher quality output
+      const scale = state.quality === 'high' ? 2.5 : 2;
+      const canvas = await html2canvas(banner, {
+        scale: scale,
+        backgroundColor: state.backgroundColor,
+        useCORS: true,
+        allowTaint: false,
+        logging: false
+      });
+
+      // Create output canvas with exact platform dimensions
+      const outputCanvas = document.createElement('canvas');
+      outputCanvas.width = ratio.width;
+      outputCanvas.height = ratio.height;
+      const ctx = outputCanvas.getContext('2d');
+
+      // Fill background and draw image
+      ctx.fillStyle = state.backgroundColor;
+      ctx.fillRect(0, 0, outputCanvas.width, outputCanvas.height);
+      ctx.drawImage(canvas, 0, 0, outputCanvas.width, outputCanvas.height);
+
+      // Create download link
+      const link = document.createElement('a');
+      link.download = `InfoMela_${lang}_${Date.now()}.png`;
+      link.href = outputCanvas.toDataURL('image/png', 1.0);
+      link.click();
+    } catch (err) {
+      console.error(err);
+      alert('Image download failed. Please check if your images are CORS-enabled.');
+    }
+  }
+
+  async function downloadVideo(banner, lang, ratio) {
+    const progress = document.getElementById('progressIndicator');
+    const btnEN = document.getElementById('btnVideoEN');
+    const btnBN = document.getElementById('btnVideoBN');
+
+    btnEN.disabled = true;
+    btnBN.disabled = true;
+    progress.classList.add('active');
+    progress.textContent = 'Rendering high-quality video…';
+
+    try {
+      // Make all images CORS-safe
+      banner.querySelectorAll('img').forEach(img => {
+        if (img.src.startsWith('http')) img.crossOrigin = 'anonymous';
+      });
+
+      // Higher scale for better video quality
+      const scale = state.quality === 'high' ? 2.5 : 2;
+      const snapshot = await html2canvas(banner, {
+        scale: scale,
+        backgroundColor: state.backgroundColor,
+        useCORS: true,
+        logging: false
+      });
+
+      const snapshotImage = await canvasToImage(snapshot);
+
+      // Create video canvas with exact platform dimensions
+      const videoCanvas = document.createElement('canvas');
+      videoCanvas.width = ratio.width;
+      videoCanvas.height = ratio.height;
+      const ctx = videoCanvas.getContext('2d');
+
+      // Determine best codec
+      const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') 
+        ? 'video/webm;codecs=vp9' 
+        : MediaRecorder.isTypeSupported('video/webm;codecs=vp8') 
+          ? 'video/webm;codecs=vp8' 
+          : 'video/webm';
+
+      // Set higher bitrate for high quality
+      const videoBitsPerSecond = state.quality === 'high' ? 10000000 : 5000000; // 10 Mbps for high quality
+
+      const stream = videoCanvas.captureStream(videoConfig.fps);
+      const recorder = new MediaRecorder(stream, { 
+        mimeType: mimeType,
+        videoBitsPerSecond: videoBitsPerSecond
+      });
+
+      const chunks = [];
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) chunks.push(e.data);
+      };
+
+      const duration = videoConfig.duration * 1000; // Convert to ms
+      const totalFrames = Math.round(videoConfig.fps * videoConfig.duration);
+      let frame = 0;
+
+      // Start recording
+      recorder.start();
+
+      // Animation loop with higher quality timing
+      const renderLoop = (startTime) => {
+        const now = performance.now();
+        const elapsed = now - startTime;
+        const progress = Math.min(1, elapsed / duration);
+        const frameIndex = Math.min(totalFrames - 1, Math.floor(progress * totalFrames));
+
+        // Only render when frame changes
+        if (frameIndex > frame) {
+          drawAnimatedFrame(ctx, snapshotImage, videoCanvas.width, videoCanvas.height, progress);
+          frame = frameIndex;
+        }
+
+        // Continue until duration is reached
+        if (elapsed < duration) {
+          requestAnimationFrame(() => renderLoop(startTime));
+        } else {
+          recorder.stop();
+        }
+      };
+
+      renderLoop(performance.now());
+
+      // Wait for recording to finish
+      await new Promise((resolve, reject) => {
+        recorder.onstop = resolve;
+        recorder.onerror = reject;
+      });
+
+      // Create and download video
+      const blob = new Blob(chunks, { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `InfoMela_${lang}_high_quality_${Date.now()}.webm`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert('Video generation failed. Please try again or reduce quality settings.');
+    } finally {
+      btnEN.disabled = false;
+      btnBN.disabled = false;
+      progress.classList.remove('active');
+      progress.textContent = '';
+    }
+  }
+
+  function drawAnimatedFrame(ctx, image, width, height, progress) {
+    ctx.fillStyle = state.backgroundColor;
+    ctx.fillRect(0, 0, width, height);
+
+    // Smoother, slower animation for high quality
+    const oscillation = Math.sin(progress * Math.PI * videoConfig.animationSpeed);
+    const zoom = 1 + (videoConfig.zoomEffect / 100) * oscillation;
+    const moveX = Math.sin(progress * Math.PI * 1.5) * 15 * videoConfig.animationSpeed;
+    const moveY = Math.cos(progress * Math.PI * 1.2) * 8 * videoConfig.animationSpeed;
+
+    ctx.save();
+    ctx.translate(width / 2 + moveX, height / 2 + moveY);
+    ctx.scale(zoom, zoom);
+    ctx.drawImage(image, -width / 2, -height / 2, width, height);
+    ctx.restore();
+  }
+
+  function canvasToImage(canvas) {
+    return new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.src = canvas.toDataURL('image/png', 1.0);
+    });
+  }
+</script>
 </body>
 </html>
