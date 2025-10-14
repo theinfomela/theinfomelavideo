@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Enhanced InfoMela Studio — Fixed Version</title>
+  <title>Enhanced InfoMela Studio</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Noto+Sans+Bengali:wght@600;700&display=swap" rel="stylesheet" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -59,26 +59,35 @@
       background: #fff; border-radius: 20px; color: #000; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
       padding: 30px;
     }
-    .banner-wrapper { margin: auto; width: 720px; background: #f7f7f7; padding: 15px; border-radius: 18px; border: 10px solid #d32f2f; }
-    .banner { position: relative; background: #fff; border-radius: 14px; overflow: hidden; }
-    .top-strip { background: linear-gradient(90deg,#d32f2f,#a50000); color:#fff; padding:15px 20px; display:flex; justify-content:space-between; align-items:center; }
-    .brand-area { display:flex; gap:10px; align-items:center; font-weight:800;}
-    .brand-logo { width:100px; height:auto; }
-    .image-panel{margin:15px;border:5px solid rgba(211,47,47,.8);border-radius:12px;overflow:hidden;background:#000;}
-    .image-panel img{width:100%;height:100%;object-fit:contain;}
-    .headline-area{margin:15px;padding:15px;background:#fff;border-radius:10px;border:2px solid rgba(211,47,47,.4);}
-    .headline-text{color:#c80000;font-weight:800;line-height:1.4;}
-    .cta-ribbon{margin:20px;background:linear-gradient(90deg,#d32f2f,#a50000);color:#fff;text-align:center;padding:10px;font-weight:700;border-radius:10px;}
-    .footer-bar{background:#222;color:#fff;display:flex;justify-content:center;gap:15px;padding:10px;border-top:3px solid #d32f2f;}
-    .progress-indicator{margin-top:10px;color:#667eea;font-weight:600;}
+    .banner-wrapper { padding: 15px; border-radius: 22px; border: 12px solid #d32f2f; position: relative; overflow: hidden; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35); transition: all 0.3s; }
+    .banner { position: relative; background: #fff; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; }
+    .top-strip { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(90deg,#d32f2f,#a50000); color:#fff; }
+    .brand-area { display: flex; gap: 10px; align-items: center; font-weight: 800; }
+    .brand-logo { width: 100px; filter: brightness(0.92); }
+    .slogan { font-size: 0.8rem; }
+    .image-panel { flex-grow: 1; margin: 15px; border: 5px solid rgba(211,47,47,.8); border-radius: 12px; overflow: hidden; background: #000; display: flex; align-items: center; justify-content: center; }
+    .image-panel img { width: 100%; height: 100%; object-fit: contain; }
+    .headline-area { margin: 15px; padding: 15px; background: #fff; border-radius: 10px; border: 2px solid rgba(211,47,47,.4); }
+    .headline-text { color: #c80000; font-weight: 800; line-height: 1.4; }
+    .cta-ribbon { margin: 20px; background: linear-gradient(90deg,#d32f2f,#a50000); color: #fff; text-align: center; padding: 10px; font-weight: 700; border-radius: 10px; }
+    .footer-bar { background: #222; color: #fff; display: flex; justify-content: center; align-items: center; gap: 18px; padding: 16px; border-top: 3px solid #d32f2f; }
+    .social-item { display: flex; align-items: center; gap: 6px; font-size: 0.9rem; font-weight: 700; }
+    .social-icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 700; color: #fff; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); }
+    .icon-facebook { background: #1877F2; }
+    .icon-twitter { background: #1DA1F2; }
+    .icon-youtube { background: #FF0000; }
+    .icon-instagram {
+      background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    }
+    .progress-indicator { margin-top: 15px; background: #f0f4ff; text-align: center; font-size: 0.9rem; color: #667eea; font-weight: 600; display: none; padding: 10px; border-radius: 8px; }
   </style>
 </head>
 
 <body>
 <div class="main-container">
   <div class="control-panel">
-    <h1>🎬 InfoMela Studio (Fixed)</h1>
-    <p>Generate banners and 30–120s looping videos directly in Chrome!</p>
+    <h1>🎬 InfoMela Studio</h1>
+    <p>Create customized banners and looping videos with your unique style!</p>
 
     <div class="form-group">
       <label>Date</label>
@@ -128,7 +137,7 @@
     </div>
     <div class="form-group">
       <label>Zoom Intensity (0–30)</label>
-      <input type="range" id="zoomEffect" min="0" max="30" step="1" value="8"/>
+      <input type="range" id="zoomEffect" min="0" max="30" step="1" value="5"/>
     </div>
 
     <div class="btn-download btn-english" onclick="downloadBanner('english','image')">Download English Image</div>
@@ -142,25 +151,35 @@
   <div class="preview-section">
     <div class="preview-container">
       <h2>English Preview</h2>
-      <div class="banner-wrapper">
+      <div class="banner-wrapper" id="wrapperEN">
         <div class="banner" id="bannerEN">
-          <div class="top-strip"><div class="brand-area"><img id="logoEN" class="brand-logo" src="" alt="Logo"/><span>InfoMela</span></div><div id="dateEN"></div></div>
+          <div class="top-strip"><div class="brand-area"><img id="logoEN" class="brand-logo" src="" alt="Logo"/><span class="slogan">News. Fun. Facts.</span></div><div id="dateEN"></div></div>
           <div class="image-panel"><img id="bgImageEN" src="" alt=""/></div>
           <div class="headline-area"><div id="captionDisplayEN" class="headline-text"></div></div>
           <div class="cta-ribbon" id="ctaEN">DETAILS BELOW</div>
-          <div class="footer-bar">@theinfomela</div>
+          <div class="footer-bar">
+            <div class="social-item"><div class="social-icon icon-facebook">f</div><span>@theinfomelaa</span></div>
+            <div class="social-item"><div class="social-icon icon-twitter">𝕏</div><span>@theinfomela</span></div>
+            <div class="social-item"><div class="social-icon icon-youtube">▶</div><span>@theinfomela</span></div>
+            <div class="social-item"><div class="social-icon icon-instagram">⧉</div><span>@theinfomela</span></div>
+          </div>
         </div>
       </div>
     </div>
     <div class="preview-container">
       <h2>বাংলা প্রিভিউ</h2>
-      <div class="banner-wrapper">
+      <div class="banner-wrapper" id="wrapperBN">
         <div class="banner bangla-text" id="bannerBN">
-          <div class="top-strip"><div class="brand-area"><img id="logoBN" class="brand-logo" src="" alt="Logo"/><span>ইনফো মেলা</span></div><div id="dateBN"></div></div>
+          <div class="top-strip"><div class="brand-area"><img id="logoBN" class="brand-logo" src="" alt="Logo"/><span class="slogan">খবর. মজা. তথ্য.</span></div><div id="dateBN"></div></div>
           <div class="image-panel"><img id="bgImageBN" src="" alt=""/></div>
           <div class="headline-area"><div id="captionDisplayBN" class="headline-text"></div></div>
           <div class="cta-ribbon" id="ctaBN">বিস্তারিত নিচে</div>
-          <div class="footer-bar">@theinfomela</div>
+          <div class="footer-bar">
+            <div class="social-item"><div class="social-icon icon-facebook">f</div><span>@theinfomelaa</span></div>
+            <div class="social-item"><div class="social-icon icon-twitter">𝕏</div><span>@theinfomela</span></div>
+            <div class="social-item"><div class="social-icon icon-youtube">▶</div><span>@theinfomela</span></div>
+            <div class="social-item"><div class="social-icon icon-instagram">⧉</div><span>@theinfomela</span></div>
+          </div>
         </div>
       </div>
     </div>
@@ -176,8 +195,8 @@ const PLATFORM_RATIOS = {
   'youtube': { width:1920, height:1080 },
   'ig-story': { width:1080, height:1920 }
 };
-const state = { backgroundColor:'#fff', logoURL:null, photoURL:null };
-const videoConfig = { duration:60, fps:30, zoomEffect:8 };
+const state = { backgroundColor: '#fff', logoURL: null, photoURL: null };
+const videoConfig = { duration: 60, fps: 30, zoomEffect: 5 };
 
 document.addEventListener('DOMContentLoaded', () => {
   const today = new Date(); document.getElementById('bannerDate').value = today.toISOString().split('T')[0];
@@ -198,95 +217,226 @@ document.addEventListener('DOMContentLoaded', () => {
 function updateDate() {
   const val = document.getElementById('bannerDate').value; if (!val) return;
   const date = new Date(val);
-  document.getElementById('dateEN').textContent = date.toDateString().toUpperCase();
+  document.getElementById('dateEN').textContent = date.toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }).toUpperCase();
   document.getElementById('dateBN').textContent = `${date.getDate()} অক্টোবর ${date.getFullYear()}`;
 }
 
 function updateCaptions() {
   document.getElementById('captionDisplayEN').textContent = document.getElementById('captionEN').value;
   document.getElementById('captionDisplayBN').textContent = document.getElementById('captionBN').value;
+  adjustFontSize('captionDisplayEN', document.getElementById('captionEN').value.length);
+  adjustFontSize('captionDisplayBN', document.getElementById('captionBN').value.length);
+  updatePlatformRatio();
+}
+
+function adjustFontSize(elementId, length) {
+  const el = document.getElementById(elementId);
+  const baseSize = 1.6;
+  const size = Math.max(1.2, baseSize - (length / 150));
+  el.style.fontSize = `${size}rem`;
 }
 
 function handleLogoUpload(e) {
   const file = e.target.files[0]; if (!file) return;
+  if (state.logoURL) URL.revokeObjectURL(state.logoURL);
   state.logoURL = URL.createObjectURL(file);
   document.getElementById('logoInfo').textContent = file.name;
   document.getElementById('logoEN').src = state.logoURL;
   document.getElementById('logoBN').src = state.logoURL;
+  extractDominantColor(state.logoURL);
 }
 
 function handleImageUpload(e) {
   const file = e.target.files[0]; if (!file) return;
+  if (state.photoURL) URL.revokeObjectURL(state.photoURL);
   state.photoURL = URL.createObjectURL(file);
   document.getElementById('imageInfo').textContent = file.name;
   document.getElementById('bgImageEN').src = state.photoURL;
   document.getElementById('bgImageBN').src = state.photoURL;
 }
 
+function extractDominantColor(src) {
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    ctx.drawImage(img, 0, 0);
+    const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    let r = 0, g = 0, b = 0, count = 0;
+
+    for (let i = 0; i < data.length; i += 4) {
+      if (data[i + 3] > 120) {
+        r += data[i];
+        g += data[i + 1];
+        b += data[i + 2];
+        count++;
+      }
+    }
+    if (!count) return;
+
+    r = Math.round(r / count);
+    g = Math.round(g / count);
+    b = Math.round(b / count);
+    const hex = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
+    applyBrandColor(hex);
+  };
+  img.src = src;
+}
+
+function applyBrandColor(color) {
+  const darker = shadeColor(color, -35);
+  const lighter = shadeColor(color, -15);
+
+  document.querySelectorAll('.banner-wrapper').forEach(wrapper => wrapper.style.borderColor = color);
+  document.querySelectorAll('.top-strip').forEach(el => el.style.background = `linear-gradient(90deg, ${color} 0%, ${darker} 100%)`);
+  document.querySelectorAll('.cta-ribbon').forEach(el => el.style.background = `linear-gradient(90deg, ${color} 0%, ${darker} 100%)`);
+  document.querySelectorAll('.headline-area').forEach(el => el.style.borderColor = `${color}55`);
+  document.querySelectorAll('.headline-text').forEach(el => el.style.color = lighter);
+  document.querySelectorAll('.image-panel').forEach(el => el.style.borderColor = `${color}DD`);
+  document.querySelectorAll('.footer-bar').forEach(el => el.style.borderTopColor = `${color}CC`);
+}
+
+function shadeColor(color, percent) {
+  const num = parseInt(color.slice(1), 16);
+  const amt = Math.round(2.55 * percent);
+  const R = Math.min(255, Math.max(0, (num >> 16) + amt));
+  const G = Math.min(255, Math.max(0, (num >> 8 & 0x00ff) + amt));
+  const B = Math.min(255, Math.max(0, (num & 0x0000ff) + amt));
+  return `#${(R << 16 | G << 8 | B).toString(16).padStart(6, '0').toUpperCase()}`;
+}
+
+function updatePlatformRatio() {
+  const platform = document.getElementById('platformSelect').value;
+  const ratio = PLATFORM_RATIOS[platform];
+  const baseWidth = 700;
+
+  document.querySelectorAll('.banner-wrapper').forEach(wrapper => {
+    const banner = wrapper.querySelector('.banner');
+    const ratioHeight = Math.round((ratio.height / ratio.width) * baseWidth);
+    const contentHeight = banner.scrollHeight + 40;
+    wrapper.style.width = `${baseWidth}px`;
+    wrapper.style.height = `${Math.max(ratioHeight, contentHeight)}px`;
+  });
+}
+
 async function downloadBanner(lang, type) {
-  const banner = document.getElementById(lang === 'english' ? 'bannerEN' : 'bannerBN');
-  const ratio = PLATFORM_RATIOS[document.getElementById('platformSelect').value];
-  if (type === 'image') await downloadImage(banner, lang, ratio); else await downloadVideo(banner, lang, ratio);
+  const wrapperId = lang === 'english' ? 'wrapperEN' : 'wrapperBN';
+  const bannerId = lang === 'english' ? 'bannerEN' : 'bannerBN';
+  const platform = document.getElementById('platformSelect').value;
+  const ratio = PLATFORM_RATIOS[platform];
+  const banner = document.getElementById(bannerId);
+
+  if (type === 'video') document.getElementById(wrapperId).classList.add('hidden');
+
+  try {
+    if (type === 'image') {
+      await downloadImage(banner, lang, ratio);
+    } else {
+      await downloadVideo(banner, lang, ratio);
+    }
+  } finally {
+    if (type === 'video') document.getElementById(wrapperId).classList.remove('hidden');
+  }
 }
 
 async function downloadImage(banner, lang, ratio) {
   try {
     banner.querySelectorAll('img').forEach(img => { if (img.src.startsWith('http')) img.crossOrigin = 'anonymous'; });
-    const canvas = await html2canvas(banner, { scale: 2, backgroundColor: '#fff', useCORS: true });
-    const final = document.createElement('canvas'); final.width = ratio.width; final.height = ratio.height;
-    const ctx = final.getContext('2d'); ctx.drawImage(canvas, 0, 0, final.width, final.height);
-    const link = document.createElement('a'); link.download = `InfoMela_${lang}_${Date.now()}.png`;
-    link.href = final.toDataURL('image/png'); link.click();
-  } catch (err) { console.error(err); alert('Image download failed. Use local uploads or same-origin images.'); }
+    const canvas = await html2canvas(banner, { scale: 2, backgroundColor: state.backgroundColor, useCORS: true });
+    const finalCanvas = document.createElement('canvas');
+    finalCanvas.width = ratio.width;
+    finalCanvas.height = ratio.height;
+    const ctx = finalCanvas.getContext('2d');
+    ctx.fillStyle = state.backgroundColor;
+    ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+    ctx.drawImage(canvas, 0, 0, finalCanvas.width, finalCanvas.height);
+    const link = document.createElement('a');
+    link.download = `InfoMela_${lang}_${Date.now()}.png`;
+    link.href = finalCanvas.toDataURL('image/png', 1.0);
+    link.click();
+  } catch (err) {
+    console.error(err);
+    alert('Image download failed. Please check your configurations.');
+  }
 }
 
 async function downloadVideo(banner, lang, ratio) {
   const progress = document.getElementById('progressIndicator');
-  const btnEN = document.getElementById('btnVideoEN'), btnBN = document.getElementById('btnVideoBN');
-  btnEN.disabled = btnBN.disabled = true; progress.textContent = 'Rendering video...';
+  const btnEN = document.getElementById('btnVideoEN');
+  const btnBN = document.getElementById('btnVideoBN');
+
+  btnEN.disabled = true;
+  btnBN.disabled = true;
+  progress.classList.add('active');
+  progress.textContent = 'Rendering video…';
 
   try {
     const snapshot = await html2canvas(banner, { scale: 2, backgroundColor: '#fff', useCORS: true });
     const image = await canvasToImage(snapshot);
-
-    const canvas = document.createElement('canvas'); canvas.width = ratio.width; canvas.height = ratio.height;
+    const canvas = document.createElement('canvas');
+    canvas.width = ratio.width;
+    canvas.height = ratio.height;
     const ctx = canvas.getContext('2d');
-
     const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp8') ? 'video/webm;codecs=vp8' : 'video/webm';
     const stream = canvas.captureStream(videoConfig.fps);
     const recorder = new MediaRecorder(stream, { mimeType: mime });
-    const chunks = []; recorder.ondataavailable = e => e.data.size && chunks.push(e.data);
+    const chunks = [];
+    recorder.ondataavailable = e => e.data.size && chunks.push(e.data);
 
-    const totalFrames = Math.floor(videoConfig.duration * videoConfig.fps); recorder.start();
+    const totalFrames = Math.floor(videoConfig.duration * videoConfig.fps);
+    recorder.start();
     let frame = 0;
 
     function drawFrame() {
       const p = (frame % totalFrames) / totalFrames;
       drawAnimatedFrame(ctx, image, canvas.width, canvas.height, p);
       frame++;
-      if (frame < totalFrames) setTimeout(drawFrame, 1000 / videoConfig.fps); else recorder.stop();
+      if (frame < totalFrames) setTimeout(drawFrame, 1000 / videoConfig.fps);
+      else recorder.stop();
     }
 
     drawFrame();
     await new Promise(r => recorder.onstop = r);
 
-    const blob = new Blob(chunks, { type: mime }); const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = `InfoMela_${lang}_${Date.now()}.webm`; a.click(); URL.revokeObjectURL(url);
-  } catch (err) { console.error(err); alert('Video generation failed.'); }
-  finally { btnEN.disabled = btnBN.disabled = false; progress.textContent = ''; }
+    const blob = new Blob(chunks, { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `InfoMela_${lang}_${Date.now()}.webm`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error(err);
+    alert('Video generation failed.');
+  } finally {
+    progress.classList.remove('active');
+    btnEN.disabled = false;
+    btnBN.disabled = false;
+  }
 }
 
 function drawAnimatedFrame(ctx, img, w, h, p) {
-  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, w, h);
   const zoom = 1 + (Math.sin(p * Math.PI * 2) * (videoConfig.zoomEffect / 100));
-  const offsetX = Math.sin(p * Math.PI * 4) * 20;
-  const offsetY = Math.cos(p * Math.PI * 4) * 10;
-  ctx.save(); ctx.translate(w / 2 + offsetX, h / 2 + offsetY); ctx.scale(zoom, zoom);
-  ctx.drawImage(img, -w / 2, -h / 2, w, h); ctx.restore();
+  const offsetX = Math.sin(p * Math.PI) * 10;
+  const offsetY = Math.cos(p * Math.PI) * 5;
+  ctx.save();
+  ctx.translate(w / 2 + offsetX, h / 2 + offsetY);
+  ctx.scale(zoom, zoom);
+  ctx.drawImage(img, -w / 2, -h / 2, w, h);
+  ctx.restore();
 }
 
 function canvasToImage(canvas) {
-  return new Promise(res => { const img = new Image(); img.onload = () => res(img); img.src = canvas.toDataURL(); });
+  return new Promise(res => {
+    const img = new Image();
+    img.oncomplete = () => res(img);
+    img.src = canvas.toDataURL();
+  });
 }
 </script>
 
