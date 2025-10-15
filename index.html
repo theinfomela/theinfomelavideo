@@ -174,29 +174,82 @@ body{
 
     <div class="form-group">
   <label>✍️ English Headline</label>
-  <textarea id="captionEN" class="english-text">i am here</textarea>
+  <textarea id="captionEN" class="english-text">I am here</textarea>
+  <div>
+    <label>Font size (English):</label>
+    <input type="range" id="englishSizeSlider" min="10" max="80" value="20">
+    <span id="englishSizeValue">20px</span>
+  </div>
 </div>
 
 <div class="form-group">
   <label>✍️ বাংলা শিরোনাম</label>
-  <textarea id="captionBN" class="bangla-text">i am here</textarea>
+  <textarea id="captionBN" class="bangla-text">আমি এখানে</textarea>
+  <div>
+    <label>ফন্ট সাইজ (বাংলা):</label>
+    <input type="range" id="banglaSizeSlider" min="10" max="80" value="20">
+    <span id="banglaSizeValue">20px</span>
+  </div>
 </div>
 
 <style>
-  /* 🌐 English text styling */
+  /* Styling for English textarea */
   .english-text {
-    font-weight: bold;       /* Makes text bold */
-    font-size: 60px;         /* Increases font size */
-    font-family: "Arial", sans-serif; /* Clean readable font */
+    font-weight: bold;
+    font-family: "Arial", sans-serif;
+    font-size: 20px;
+    width: 100%;
+    min-height: 100px;
   }
 
-  /* 🇧🇩 Bangla text styling */
+  /* Styling for Bangla textarea */
   .bangla-text {
-    font-weight: bold;       /* Makes text bold */
-    font-size: 60px;         /* Increases font size */
-    font-family: "Noto Sans Bengali", "SolaimanLipi", sans-serif; /* Smooth Bangla font */
+    font-weight: bold;
+    font-family: "Noto Sans Bengali", "SolaimanLipi", sans-serif;
+    font-size: 20px;
+    width: 100%;
+    min-height: 100px;
+  }
+
+  label {
+    display: inline-block;
+    margin-top: 10px;
+  }
+
+  input[type="range"] {
+    vertical-align: middle;
+    margin-left: 8px;
+  }
+
+  span {
+    font-weight: bold;
+    margin-left: 4px;
   }
 </style>
+
+<script>
+  // English slider handler
+  const englishSlider = document.getElementById("englishSizeSlider");
+  const englishOutput = document.getElementById("englishSizeValue");
+  const englishTextarea = document.getElementById("captionEN");
+
+  englishSlider.addEventListener("input", () => {
+    const newSize = englishSlider.value + "px";
+    englishTextarea.style.fontSize = newSize;
+    englishOutput.textContent = newSize;
+  });
+
+  // Bangla slider handler
+  const banglaSlider = document.getElementById("banglaSizeSlider");
+  const banglaOutput = document.getElementById("banglaSizeValue");
+  const banglaTextarea = document.getElementById("captionBN");
+
+  banglaSlider.addEventListener("input", () => {
+    const newSize = banglaSlider.value + "px";
+    banglaTextarea.style.fontSize = newSize;
+    banglaOutput.textContent = newSize;
+  });
+</script>
 
     <div class="video-options">
       <h4>🎬 Video Settings</h4>
