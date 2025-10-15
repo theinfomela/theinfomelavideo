@@ -172,49 +172,97 @@ body{
       </div>
     </div>
 
-    <div class="form-group"><label>✍️ English Headline</label><textarea id="captionEN"></textarea></div>
-    <div class="form-group"><label>✍️ বাংলা শিরোনাম</label><textarea id="captionBN" class="bangla-text"></textarea></div>
+    <div class="form-group">
+  <label>✍️ English Headline</label>
+  <textarea id="captionEN">i am here</textarea>
+</div>
 
-    <div class="video-options">
-      <h4>🎬 Video Settings</h4>
-      <div class="option-row"><label>Duration (sec)</label><input type="number" id="videoDuration" min="5" max="15" value="10"></div>
-      <div class="option-row"><label>Frame Rate</label>
-        <select id="fps"><option value="24">24</option><option value="30" selected>30</option></select>
-      </div>
-    </div>
+<div class="form-group">
+  <label>✍️ বাংলা শিরোনাম</label>
+  <textarea id="captionBN" class="bangla-text">i am here</textarea>
+</div>
 
-    <div class="advanced-toggle" onclick="toggleAdvancedOptions()">
-      <span>⚙️ Advanced Animations</span><span id="advancedArrow">▼</span>
-    </div>
-    <div class="advanced-content" id="advancedContent">
-      <div class="range-row"><label>Animation Speed</label><input type="range" id="animationSpeed" min="0.5" max="3" step="0.1" value="1"></div>
-      <div class="range-row"><label>Zoom Intensity</label><input type="range" id="zoomEffect" min="0" max="20" step="1" value="5"></div>
-      <div class="range-row"><label>Video Quality (%)</label><input type="range" id="quality" min="50" max="90" value="75" step="5"><span id="qualityValue">75%</span></div>
-    </div>
+<style>
+  .bangla-text {
+    font-weight: bold;      /* Makes Bangla text bold */
+    font-size: 20px;        /* Increases font size */
+    font-family: "Noto Sans Bengali", sans-serif; /* (Optional) improves Bangla rendering */
+  }
+</style>
 
-    <div class="btn-section">
-      <h3>📥 Download Static Images</h3>
-      <button class="btn-download btn-english" onclick="downloadBanner('english','image')">Download English Image</button>
-      <button class="btn-download btn-bangla" onclick="downloadBanner('bangla','image')">বাংলা ছবি ডাউনলোড</button>
-    </div>
-
-    <div class="btn-section">
-      <h3>🎬 Download Videos</h3>
-      <button class="btn-download btn-video" onclick="downloadBanner('english','video')">🎥 English Video</button>
-      <button class="btn-download btn-video" onclick="downloadBanner('bangla','video')">🎥 বাংলা ভিডিও</button>
-      <div id="progressIndicator" class="progress-indicator">Working…</div>
-    </div>
+<div class="video-options">
+  <h4>🎬 Video Settings</h4>
+  <div class="option-row">
+    <label>Duration (sec)</label>
+    <input type="number" id="videoDuration" min="5" max="15" value="10">
   </div>
+  <div class="option-row">
+    <label>Frame Rate</label>
+    <select id="fps">
+      <option value="24">24</option>
+      <option value="30" selected>30</option>
+    </select>
+  </div>
+</div>
 
-  <!-- PREVIEWS -->
-  <div class="preview-section">
-    <div class="preview-container">
-      <div class="preview-header"><h2>English Preview</h2><span class="lang-badge">ENGLISH</span></div>
-      <div class="banner-wrapper"><div class="banner" id="bannerEN">
-        <div class="top-strip"><div class="brand-area"><img class="brand-logo" id="logoEN"
-          src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='48'%3E%3Crect fill='%23fff' width='200' height='80' rx='10'/%3E%3Ctext x='100' y='50' font-family='Arial' font-size='32' font-weight='bold' fill='%23d32f2f' text-anchor='middle'%3EInfoMela%3C/text%3E%3C/svg%3E"><span class="slogan">News.Fun.Facts</span></div><div class="date-badge" id="dateEN">14 OCTOBER 2025</div></div>
-        <div class="image-panel"><img id="bgImageEN" src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80"><div class="image-overlay"></div></div>
-        <div class="headline-area"><div class="headline-text" id="captionDisplayEN"></div></div>
+<div class="advanced-toggle" onclick="toggleAdvancedOptions()">
+  <span>⚙️ Advanced Animations</span><span id="advancedArrow">▼</span>
+</div>
+
+<div class="advanced-content" id="advancedContent">
+  <div class="range-row">
+    <label>Animation Speed</label>
+    <input type="range" id="animationSpeed" min="0.5" max="3" step="0.1" value="1">
+  </div>
+  <div class="range-row">
+    <label>Zoom Intensity</label>
+    <input type="range" id="zoomEffect" min="0" max="20" step="1" value="5">
+  </div>
+  <div class="range-row">
+    <label>Video Quality (%)</label>
+    <input type="range" id="quality" min="50" max="90" value="75" step="5">
+    <span id="qualityValue">75%</span>
+  </div>
+</div>
+
+<div class="btn-section">
+  <h3>📥 Download Static Images</h3>
+  <button class="btn-download btn-english" onclick="downloadBanner('english','image')">Download English Image</button>
+  <button class="btn-download btn-bangla" onclick="downloadBanner('bangla','image')">বাংলা ছবি ডাউনলোড</button>
+</div>
+
+<div class="btn-section">
+  <h3>🎬 Download Videos</h3>
+  <button class="btn-download btn-video" onclick="downloadBanner('english','video')">🎥 English Video</button>
+  <button class="btn-download btn-video" onclick="downloadBanner('bangla','video')">🎥 বাংলা ভিডিও</button>
+  <div id="progressIndicator" class="progress-indicator">Working…</div>
+</div>
+
+<!-- PREVIEWS -->
+<div class="preview-section">
+  <div class="preview-container">
+    <div class="preview-header">
+      <h2>English Preview</h2>
+      <span class="lang-badge">ENGLISH</span>
+    </div>
+    <div class="banner-wrapper">
+      <div class="banner" id="bannerEN">
+        <div class="top-strip">
+          <div class="brand-area">
+            <img class="brand-logo" id="logoEN"
+              src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='48'%3E%3Crect fill='%23fff' width='200' height='80' rx='10'/%3E%3Ctext x='100' y='50' font-family='Arial' font-size='32' font-weight='bold' fill='%23d32f2f' text-anchor='middle'%3EInfoMela%3C/text%3E%3C/svg%3E">
+            <span class="slogan">News.Fun.Facts</span>
+          </div>
+          <div class="date-badge" id="dateEN">14 OCTOBER 2025</div>
+        </div>
+        <div class="image-panel">
+          <img id="bgImageEN"
+            src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80">
+          <div class="image-overlay"></div>
+        </div>
+        <div class="headline-area">
+          <div class="headline-text" id="captionDisplayEN"></div>
+        </div>
         <div class="cta-ribbon" id="ctaEN">DETAILS IN COMMENTS</div>
         <div class="footer-bar">
           <div class="social-item"><div class="social-icon icon-facebook">f</div><span>@theinfomelaa</span></div>
@@ -222,16 +270,33 @@ body{
           <div class="social-item"><div class="social-icon icon-youtube">▶</div><span>@theinfomela</span></div>
           <div class="social-item"><div class="social-icon icon-instagram">⧉</div><span>@theinfomela</span></div>
         </div>
-      </div></div>
+      </div>
     </div>
+  </div>
 
-    <div class="preview-container">
-      <div class="preview-header"><h2>বাংলা প্রিভিউ</h2><span class="lang-badge bangla">বাংলা</span></div>
-      <div class="banner-wrapper"><div class="banner bangla-text" id="bannerBN">
-        <div class="top-strip"><div class="brand-area"><img class="brand-logo" id="logoBN"
-          src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='48'%3E%3Crect fill='%23fff' width='200' height='80' rx='10'/%3E%3Ctext x='100' y='50' font-family='Arial' font-size='32' font-weight='bold' fill='%23d32f2f' text-anchor='middle'%3Eইনফো মেলা%3C/text%3E%3C/svg%3E"><span class="slogan">খবর.মজা.তথ্য</span></div><div class="date-badge" id="dateBN">১৪ অক্টোবর ২০২৫</div></div>
-        <div class="image-panel"><img id="bgImageBN" src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80"><div class="image-overlay"></div></div>
-        <div class="headline-area"><div class="headline-text" id="captionDisplayBN"></div></div>
+  <div class="preview-container">
+    <div class="preview-header">
+      <h2>বাংলা প্রিভিউ</h2>
+      <span class="lang-badge bangla">বাংলা</span>
+    </div>
+    <div class="banner-wrapper">
+      <div class="banner bangla-text" id="bannerBN">
+        <div class="top-strip">
+          <div class="brand-area">
+            <img class="brand-logo" id="logoBN"
+              src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='48'%3E%3Crect fill='%23fff' width='200' height='80' rx='10'/%3E%3Ctext x='100' y='50' font-family='Arial' font-size='32' font-weight='bold' fill='%23d32f2f' text-anchor='middle'%3Eইনফো মেলা%3C/text%3E%3C/svg%3E">
+            <span class="slogan">খবর.মজা.তথ্য</span>
+          </div>
+          <div class="date-badge" id="dateBN">১৪ অক্টোবর ২০২৫</div>
+        </div>
+        <div class="image-panel">
+          <img id="bgImageBN"
+            src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80">
+          <div class="image-overlay"></div>
+        </div>
+        <div class="headline-area">
+          <div class="headline-text" id="captionDisplayBN"></div>
+        </div>
         <div class="cta-ribbon" id="ctaBN">বিস্তারিত কমেন্টে</div>
         <div class="footer-bar">
           <div class="social-item"><div class="social-icon icon-facebook">f</div><span>@theinfomelaa</span></div>
@@ -239,148 +304,7 @@ body{
           <div class="social-item"><div class="social-icon icon-youtube">▶</div><span>@theinfomela</span></div>
           <div class="social-item"><div class="social-icon icon-instagram">⧉</div><span>@theinfomela</span></div>
         </div>
-      </div></div>
+      </div>
     </div>
   </div>
 </div>
-
-<script>
-const PLATFORM_RATIOS={
- 'fb-square':{width:1080,height:1080},'fb-landscape':{width:1280,height:720},
- 'fb-portrait':{width:1080,height:1350},'ig-story':{width:1080,height:1920},
- 'youtube':{width:1920,height:1080}
-};
-const state={logoObjectURL:null,mediaObjectURL:null,mediaType:'image'};
-const videoConfig={duration:10,fps:30,animationSpeed:1,zoomEffect:5,quality:75};
-
-document.addEventListener('DOMContentLoaded',()=>{initUI();});
-function initUI(){
-  const today=new Date();
-  bannerDate.value=today.toISOString().split('T')[0];
-  updateDate();updateCaptions();updatePlatformRatio();
-  bannerDate.addEventListener('change',updateDate);
-  platformSelect.addEventListener('change',updatePlatformRatio);
-  captionEN.addEventListener('input',updateCaptions);
-  captionBN.addEventListener('input',updateCaptions);
-  logoInput.addEventListener('change',handleLogoUpload);
-  mediaInput.addEventListener('change',handleMediaUpload);
-  videoDuration.addEventListener('change',e=>{videoConfig.duration=Math.max(5,Math.min(15,+e.target.value||10));});
-  fps.addEventListener('change',e=>videoConfig.fps=+e.target.value);
-  animationSpeed.addEventListener('input',e=>videoConfig.animationSpeed=+e.target.value);
-  zoomEffect.addEventListener('input',e=>videoConfig.zoomEffect=+e.target.value);
-  quality.addEventListener('input',e=>{videoConfig.quality=+e.target.value;qualityValue.textContent=videoConfig.quality+'%';});
-}
-
-function toggleAdvancedOptions(){
- const c=document.getElementById('advancedContent');const a=document.getElementById('advancedArrow');
- c.classList.toggle('active');a.textContent=c.classList.contains('active')?'▲':'▼';
-}
-function updateDate(){
- const d=new Date(bannerDate.value+'T00:00');
- const enOpt={year:'numeric',month:'long',day:'numeric'};
- dateEN.textContent=d.toLocaleDateString('en-GB',enOpt).toUpperCase();
- const bnMonths=['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
- dateBN.textContent=`${d.getDate()} ${bnMonths[d.getMonth()]} ${d.getFullYear()}`;
-}
-function updateCaptions(){
- captionDisplayEN.textContent=captionEN.value.trim();
- captionDisplayBN.textContent=captionBN.value.trim();
-}
-function updatePlatformRatio(){
- const ratio=PLATFORM_RATIOS[platformSelect.value];
- const base=700;
- document.querySelectorAll('.banner-wrapper').forEach(w=>{
- const b=w.querySelector('.banner');
- w.style.width=base+'px';
- const expectedH=Math.round((ratio.height/ratio.width)*base);
- w.style.height=Math.max(expectedH,b.scrollHeight+40)+'px';
- });
-}
-
-/* Upload handlers */
-function handleLogoUpload(e){
- const f=e.target.files[0];if(!f)return;
- const rd=new FileReader();
- rd.onload=ev=>{logoEN.src=logoBN.src=ev.target.result;};
- rd.readAsDataURL(f);
-}
-function handleMediaUpload(e){
- const f=e.target.files[0];if(!f)return;
- const isVideo=f.type.startsWith('video/');
- if(isVideo){
-  const v=document.createElement('video');v.src=URL.createObjectURL(f);
-  v.onloadeddata=()=>{
-   const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;
-   c.getContext('2d').drawImage(v,0,0);const data=c.toDataURL('image/jpeg',0.9);
-   bgImageEN.src=bgImageBN.src=data;state.mediaType='video';
-  };
- }else{
-  const rd=new FileReader();rd.onload=ev=>{bgImageEN.src=bgImageBN.src=ev.target.result;state.mediaType='image';};
-  rd.readAsDataURL(f);
- }
-}
-
-/* Download core */
-async function downloadBanner(lang,type){
- const banner=document.getElementById(lang==='english'?'bannerEN':'bannerBN');
- const ratio=PLATFORM_RATIOS[platformSelect.value];
- const progress=document.getElementById('progressIndicator');
- progress.classList.add('active');
- try{
-  if(type==='image')await downloadImage(banner,lang,ratio);
-  else await downloadVideo(banner,lang,ratio);
- }catch(e){alert('Error: '+e.message);}
- finally{progress.classList.remove('active');}
-}
-
-async function downloadImage(banner,lang,ratio){
- const c=await html2canvas(banner,{scale:2,useCORS:true,allowTaint:true});
- const out=document.createElement('canvas');out.width=ratio.width;out.height=ratio.height;
- const ctx=out.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,out.width,out.height);
- ctx.drawImage(c,0,0,out.width,out.height);
- out.toBlob(b=>{
-  const u=URL.createObjectURL(b);const a=document.createElement('a');
-  a.href=u;a.download=`InfoMela_${lang}_${Date.now()}.jpg`;a.click();URL.revokeObjectURL(u);
- },'image/jpeg',0.95);
-}
-
-/* Working video generator from first version */
-async function downloadVideo(banner,lang,ratio){
- const progress=document.getElementById('progressIndicator');
- progress.textContent='Generating video…';
- const canvas=await html2canvas(banner,{scale:1.5,useCORS:true,allowTaint:true,backgroundColor:'#fff'});
- const vcan=document.createElement('canvas');
- vcan.width=ratio.width;vcan.height=ratio.height;
- const ctx=vcan.getContext('2d');
- const types=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'];
- let mime=types.find(t=>MediaRecorder.isTypeSupported(t))||'video/webm';
- const stream=vcan.captureStream(videoConfig.fps);
- const recorder=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:2500000});
- const chunks=[];
- recorder.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data);};
- const total=videoConfig.duration*videoConfig.fps;let i=0;
- function draw(){
-   const p=i/total;
-   ctx.fillStyle='#fff';ctx.fillRect(0,0,vcan.width,vcan.height);
-   const z=1+(videoConfig.zoomEffect/100)*Math.sin(p*Math.PI);
-   const px=Math.sin(p*Math.PI*2)*20*videoConfig.animationSpeed;
-   const py=Math.cos(p*Math.PI*2)*10*videoConfig.animationSpeed;
-   ctx.save();ctx.translate(vcan.width/2+px,vcan.height/2+py);ctx.scale(z,z);
-   ctx.drawImage(canvas,-vcan.width/2,-vcan.height/2,vcan.width,vcan.height);ctx.restore();
- }
- recorder.start();
- (function animate(){
-   if(i<total){draw();i++;requestAnimationFrame(animate);}
-   else{recorder.stop();}
- })();
- await new Promise(res=>recorder.onstop=res);
- const blob=new Blob(chunks,{type:mime});
- const url=URL.createObjectURL(blob);
- const a=document.createElement('a');a.href=url;a.download=`InfoMela_${lang}_video_${Date.now()}.webm`;
- document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
- progress.textContent='Video ready!';
- setTimeout(()=>progress.classList.remove('active'),1500);
-}
-</script>
-</body>
-</html>
