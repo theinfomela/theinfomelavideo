@@ -172,12 +172,37 @@ body{
       </div>
     </div>
 
-    <div class="form-group">
+    <style>
+  .english-text,
+  .bangla-text {
+    font-weight: bold;
+    font-size: 20px;
+    width: 100%;
+    min-height: 80px;
+  }
+
+  .slider-row {
+    margin: 6px 0 12px;
+  }
+
+  label {
+    display: inline-block;
+    width: 160px;
+  }
+
+  #captionDisplayEN,
+  #captionDisplayBN {
+    transition: font-size 0.3s ease;
+    font-weight: bold;
+  }
+</style>
+
+<div class="form-group">
   <label>✍️ English Headline</label>
   <textarea id="captionEN" class="english-text">I am here</textarea>
-  <div>
+  <div class="slider-row">
     <label>Font size (English):</label>
-    <input type="range" id="englishSizeSlider" min="10" max="80" value="20">
+    <input type="range" id="englishSizeSlider" min="10" max="100" value="20">
     <span id="englishSizeValue">20px</span>
   </div>
 </div>
@@ -185,47 +210,39 @@ body{
 <div class="form-group">
   <label>✍️ বাংলা শিরোনাম</label>
   <textarea id="captionBN" class="bangla-text">আমি এখানে</textarea>
-  <div>
+  <div class="slider-row">
     <label>ফন্ট সাইজ (বাংলা):</label>
-    <input type="range" id="banglaSizeSlider" min="10" max="80" value="20">
+    <input type="range" id="banglaSizeSlider" min="10" max="100" value="20">
     <span id="banglaSizeValue">20px</span>
   </div>
 </div>
 
-<style>
-  /* Styling for English textarea */
-  .english-text {
-    font-weight: bold;
-    font-family: "Arial", sans-serif;
-    font-size: 20px;
-    width: 100%;
-    min-height: 100px;
+<script>
+  // === COMMON LOGIC FOR BOTH ===
+  function initFontSizeControl(lang, defaultSize = 20) {
+    const textarea = document.getElementById(`caption${lang}`);
+    const slider = document.getElementById(`${lang.toLowerCase()}SizeSlider`);
+    const output = document.getElementById(`${lang.toLowerCase()}SizeValue`);
+    const preview = document.getElementById(`captionDisplay${lang}`);
+
+    function updateFontSize() {
+      const newSize = slider.value + "px";
+      textarea.style.fontSize = newSize;
+      if (preview) preview.style.fontSize = newSize; // 🔥 also affects banner preview
+      output.textContent = newSize;
+    }
+
+    slider.addEventListener("input", updateFontSize);
+    updateFontSize(); // initialize
   }
 
-  /* Styling for Bangla textarea */
-  .bangla-text {
-    font-weight: bold;
-    font-family: "Noto Sans Bengali", "SolaimanLipi", sans-serif;
-    font-size: 20px;
-    width: 100%;
-    min-height: 100px;
-  }
+  // Initialize sliders for English (EN) and Bangla (BN)
+  initFontSizeControl("EN");
+  initFontSizeControl("BN");
 
-  label {
-    display: inline-block;
-    margin-top: 10px;
-  }
-
-  input[type="range"] {
-    vertical-align: middle;
-    margin-left: 8px;
-  }
-
-  span {
-    font-weight: bold;
-    margin-left: 4px;
-  }
-</style>
+  // Your existing updateCaptions() already updates preview text,
+  // so font-size updates will be synced automatically.
+</script>
 
 <script>
   // English slider handler
