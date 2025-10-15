@@ -3,17 +3,19 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Info Mela Pro Banner & Video Maker</title>
+<title>Info Mela Ultimate Pro Studio</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800;900&family=Noto+Sans+Bengali:wght@600;700;800;900&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800;900&family=Noto+Sans+Bengali:wght@600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <style>
+/* --- BASE & UTILITY --- */
 *{margin:0;padding:0;box-sizing:border-box}
 body{
   font-family:'Poppins',sans-serif;
-  background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background:linear-gradient(135deg, #1e0000 0%, #3e0404 100%);
   min-height:100vh;padding:30px;color:#fff;
+  transition:all .5s ease;
 }
 
 .main-container{
@@ -21,12 +23,13 @@ body{
   display:grid;grid-template-columns:400px 1fr;gap:40px;
 }
 
-/* SIMPLIFIED CONTROL PANEL - Better Performance */
+/* --- CONTROL PANEL --- */
 .control-panel{
-  background:rgba(255,255,255,0.96);
+  background:rgba(255,255,255,0.95);
   border-radius:20px;padding:35px;
-  box-shadow:0 20px 60px rgba(0,0,0,.3);
+  box-shadow:0 15px 40px rgba(0,0,0,.4);
   position:sticky;top:30px;max-height:95vh;overflow-y:auto;
+  border:1px solid rgba(0,0,0,.1);
 }
 
 .control-panel::-webkit-scrollbar {width:8px;}
@@ -34,16 +37,12 @@ body{
 .control-panel::-webkit-scrollbar-thumb {background:#667eea;border-radius:10px;}
 
 .control-panel h1{
-  color:#667eea;font-size:1.9rem;margin-bottom:8px;
-  font-weight:900;letter-spacing:-0.5px;
+  color:#a50000;font-size:1.8rem;margin-bottom:8px;
+  font-weight:900;
 }
 
-.control-panel > p{
-  color:#666;margin-bottom:30px;font-size:.95rem;
-}
-
+.control-panel > p{color:#666;margin-bottom:30px;font-size:.95rem;}
 .form-group{margin-bottom:25px;}
-
 .form-group label{
   display:block;color:#333;font-weight:700;
   margin-bottom:10px;font-size:.95rem;
@@ -58,362 +57,251 @@ body{
 }
 
 .form-group input:focus,.form-group textarea:focus,.form-group select:focus{
-  outline:none;border-color:#667eea;background:white;
-  box-shadow:0 0 0 4px rgba(102,126,234,.1);
+  outline:none;border-color:#d32f2f;background:white;
+  box-shadow:0 0 0 5px rgba(211,47,47,.15);
 }
 
 .upload-box{
-  border:3px dashed #667eea;border-radius:15px;
+  border:3px dashed #d32f2f;border-radius:15px;
   padding:30px;text-align:center;
   cursor:pointer;transition:all .3s;
-  background:#f0f4ff;position:relative;
+  background:#ffeded;position:relative;
 }
-
-.upload-box input{
-  position:absolute;opacity:0;width:100%;height:100%;
-  top:0;left:0;cursor:pointer;
-}
-
-.upload-box:hover{
-  background:#e6edff;border-color:#5568d3;
-  transform:translateY(-2px);
-}
-
-.upload-icon{font-size:3rem;margin-bottom:10px;color:#667eea;}
-.upload-text{color:#667eea;font-weight:600;font-size:1rem;}
+.upload-box input{position:absolute;opacity:0;width:100%;height:100%;top:0;left:0;cursor:pointer;}
+.upload-box:hover{background:#ffe3e3;border-color:#a50000;transform:translateY(-2px);}
+.upload-icon{font-size:3rem;margin-bottom:10px;color:#d32f2f;}
+.upload-text{color:#d32f2f;font-weight:600;font-size:1rem;}
 .file-info{margin-top:10px;font-size:.85rem;color:#666;}
 
-.video-options{
-  background:#f0f4ff;border-radius:10px;
+.video-options, .editing-tools{
+  background:#f0f0ff;border-radius:10px;
   padding:15px;margin-top:15px;
+  border:1px solid #d32f2f60;
+}
+.editing-tools {
+  background: #f0fff0;
 }
 
-.video-options h4{
-  color:#667eea;margin-bottom:12px;
-  font-size:.95rem;font-weight:800;
+.video-options h4, .editing-tools h4{
+  color:#a50000;margin-bottom:12px;font-size:.95rem;font-weight:800;
 }
 
-.option-row{
-  display:flex;align-items:center;gap:10px;margin-bottom:12px;
-}
-
-.option-row label{
-  color:#333;font-weight:600;font-size:.9rem;min-width:130px;
-}
-
-.option-row input,.option-row select{
-  flex:1;padding:10px;border-radius:8px;
-  border:1px solid #ccc;
-}
+.option-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.option-row label{color:#333;font-weight:600;font-size:.9rem;min-width:130px;}
+.option-row input,.option-row select{flex:1;padding:10px;border-radius:8px;border:1px solid #ccc;}
 
 .advanced-toggle{
   margin-top:22px;padding:12px 16px;border-radius:10px;
-  background:#f0f4ff;
+  background:#ffdcdc;
   display:flex;justify-content:space-between;align-items:center;
   cursor:pointer;transition:.3s;font-weight:700;color:#333;
 }
-
-.advanced-toggle:hover{background:#e6edff;}
+.advanced-toggle:hover{background:#ffcaca;}
 
 .advanced-content{display:none;margin-top:16px;}
 .advanced-content.active{display:block;}
-
 .range-row{margin-bottom:14px;}
-.range-row label{
-  display:block;margin-bottom:6px;font-weight:600;color:#333;
-}
-
+.range-row label{display:block;margin-bottom:6px;font-weight:600;color:#333;}
 .range-row input[type=range]{width:100%;}
-
-.btn-section{
-  margin-top:30px;padding-top:20px;
-  border-top:2px solid #e0e0e0;
+.checkbox-row {
+  display:flex;align-items:center;gap:10px;margin-bottom:10px;
 }
 
-.btn-section h3{
-  color:#333;font-size:1.1rem;margin-bottom:15px;font-weight:700;
-}
-
+.btn-section{margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;}
+.btn-section h3{color:#333;font-size:1.1rem;margin-bottom:15px;font-weight:700;}
 .btn-download{
   width:100%;padding:18px;border:none;border-radius:12px;
   font-size:1.1rem;font-weight:700;cursor:pointer;
   transition:all .3s;margin-top:15px;
   text-transform:uppercase;letter-spacing:.5px;
 }
-
 .btn-english{
   background:linear-gradient(135deg,#eb4141 0%,#a50000 100%);
   color:#fff;box-shadow:0 10px 30px rgba(171,0,0,.35);
 }
-
 .btn-bangla{
   background:linear-gradient(135deg,#ff9156 0%,#ff2b2f 100%);
   color:#fff;box-shadow:0 10px 30px rgba(255,58,58,.4);
 }
-
 .btn-video{
   background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
   color:#fff;box-shadow:0 10px 30px rgba(102,126,234,.4);
 }
-
-.btn-download:hover{
-  transform:translateY(-3px);
-  box-shadow:0 15px 40px rgba(0,0,0,.3);
-}
-
-.btn-download:disabled{
-  opacity:.6;cursor:not-allowed;transform:none;
-}
-
+.btn-download:hover{transform:translateY(-3px);box-shadow:0 15px 40px rgba(0,0,0,.3);}
+.btn-download:disabled{opacity:.6;cursor:not-allowed;transform:none;}
 .progress-indicator{
   margin-top:15px;padding:12px;
-  background:#f0f4ff;border-radius:8px;
+  background:#f0f0ff;border-radius:8px;
   text-align:center;font-size:.9rem;
   color:#667eea;font-weight:600;display:none;
 }
-
 .progress-indicator.active{display:block;}
 
+/* --- PREVIEW --- */
 .preview-section{display:flex;flex-direction:column;gap:40px;}
-
 .preview-container{
   background:#fff;border-radius:20px;padding:30px;
   box-shadow:0 20px 60px rgba(0,0,0,.3);color:#000;
 }
-
 .preview-header{
   display:flex;justify-content:space-between;align-items:center;
   margin-bottom:25px;padding-bottom:15px;
   border-bottom:2px solid #f0f0f0;
 }
-
-.preview-header h2{
-  color:#333;font-size:1.5rem;font-weight:700;
-}
-
+.preview-header h2{color:#333;font-size:1.5rem;font-weight:700;}
 .lang-badge{
   background:linear-gradient(135deg,#eb4141 0%,#a50000 100%);
   color:#fff;padding:8px 20px;border-radius:20px;
   font-size:.9rem;font-weight:700;
 }
-
 .lang-badge.bangla{
   background:linear-gradient(135deg,#ff9156 0%,#ff2b2f 100%);
 }
 
-/* 🎨 PROFESSIONAL CNN/BBC STYLE BANNER - NO WHITE BORDERS */
-
+/* 📰 FINAL NEWS GRAPHIC DESIGN (NO WHITE BORDERS) */
 .banner-wrapper{
   margin:0 auto;padding:0;
   background:#0d0d0d;
   border-radius:20px;
   position:relative;
   width:100%;max-width:720px;
-  box-shadow:0 25px 70px rgba(0,0,0,.6),
-             0 0 0 4px rgba(211,47,47,.7),
-             0 0 0 8px rgba(0,0,0,.4);
+  box-shadow:0 10px 25px rgba(0,0,0,.45);
+  transform-style:preserve-3d;
+  transition:transform .3s;
   overflow:hidden;
+}
+
+.banner-wrapper:hover {
+  transform:translateY(-3px) rotateX(1deg);
+}
+
+/* 3D Frame Effect */
+.banner-wrapper::before {
+  content:'';position:absolute;
+  top:0;left:0;right:0;bottom:0;
+  border-radius:20px;
+  box-shadow:0 0 0 5px rgba(211,47,47,.8) inset,
+             0 0 0 10px rgba(0,0,0,.5) inset;
+  pointer-events:none;z-index:2;
 }
 
 .banner{
-  width:100%;
-  min-height:520px;
-  position:relative;
+  width:100%;min-height:520px;position:relative;
   background:#ffffff;
   overflow:hidden;
-  display:flex;
-  flex-direction:column;
+  display:flex;flex-direction:column;
 }
 
-/* VISIBLE WATERMARK - 8% opacity */
-.banner::before {
-  content:'InfoMela';
-  position:absolute;
-  top:50%;left:50%;
-  transform:translate(-50%, -50%) rotate(-30deg);
-  font-size:110px;
-  font-weight:900;
-  color:rgba(211,47,47,0.08);
-  text-transform:uppercase;
-  letter-spacing:15px;
-  z-index:100;
+/* 💧 WATERMARK (REMOVED FROM CSS, NOW APPLIED TO CANVAS) */
+
+/* Image Filter Effects (Applied via JS Toggle) */
+.banner.grayscale #bgImageEN, .banner.grayscale #bgImageBN {
+  filter: grayscale(100%);
+}
+.banner.vignette .image-panel::after {
+  content:'';position:absolute;inset:0;z-index:2;
+  box-shadow:inset 0 0 100px 30px rgba(0,0,0,.7);
+  border-radius:12px;
   pointer-events:none;
-  font-family:'Poppins',sans-serif;
-  white-space:nowrap;
-  user-select:none;
 }
 
 /* Professional Top Bar */
 .top-strip{
-  background:linear-gradient(135deg,#d32f2f 0%,#b71c1c 50%,#a60000 100%);
-  color:#fff;
-  padding:20px 28px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+  background:linear-gradient(135deg,#a50000 0%,#870000 100%);
+  color:#fff;padding:20px 28px;
+  display:flex;justify-content:space-between;align-items:center;
   z-index:10;
-  box-shadow:0 6px 20px rgba(211,47,47,.45),
-             0 1px 0 rgba(255,255,255,.12) inset;
+  box-shadow:0 4px 15px rgba(0,0,0,.25);
+  border-bottom:2px solid #ff4444;
 }
 
 .brand-area{
   display:flex;align-items:center;gap:12px;
   font-weight:800;font-size:1.25rem;
-  text-transform:uppercase;letter-spacing:1px;
-  text-shadow:0 2px 6px rgba(0,0,0,.3);
+  letter-spacing:1px;
+  text-shadow:0 1px 4px rgba(0,0,0,.4);
 }
 
-.brand-logo{
-  max-width:110px;max-height:48px;
-  filter:drop-shadow(0 2px 6px rgba(0,0,0,.3));
-}
-
-.slogan{
-  font-size:.9rem;color:rgba(255,255,255,.95);
-  font-weight:600;text-shadow:0 1px 3px rgba(0,0,0,.3);
-}
+.brand-logo{max-width:110px;max-height:48px;}
+.slogan{font-size:.9rem;color:rgba(255,255,255,.95);font-weight:600;}
 
 .date-badge{
   background:rgba(255,255,255,.2);
-  padding:10px 20px;
-  border-radius:25px;
-  font-weight:700;
-  font-size:.9rem;
+  padding:8px 16px;border-radius:20px;
+  font-weight:700;font-size:.9rem;
   letter-spacing:.8px;
-  border:2px solid rgba(255,255,255,.35);
-  box-shadow:0 4px 10px rgba(0,0,0,.2);
-  backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.3);
 }
 
-/* FIXED: Image Panel - NO WHITE BORDERS, COVER FIT */
+/* Image Panel Fix for Scaling */
 .image-panel{
-  position:relative;
-  flex-grow:1;
-  margin:20px 28px;
-  border-radius:12px;
+  position:relative;flex-grow:1;
+  margin:20px 28px;border-radius:12px;
   overflow:hidden;
   background:#000;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-shadow:0 15px 40px rgba(0,0,0,.4),
-             0 0 0 3px rgba(211,47,47,.8);
-  min-height:400px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 5px 15px rgba(0,0,0,.3);
+  border:4px solid #d32f2f; /* Inner Border */
+  min-height:300px;
 }
 
 .image-panel img{
-  width:100%;
-  height:100%;
-  object-fit:cover; /* CHANGED FROM contain TO cover - FIXES WHITE BORDERS */
-  background:#000;
+  width:100%;height:100%;
+  object-fit:cover; /* CRUCIAL FIX */
   position:relative;
   z-index:1;
+  transition:filter .3s;
 }
 
 .image-overlay{
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  z-index:2;
-  background:linear-gradient(180deg,
-    rgba(0,0,0,.05) 0%,
-    transparent 50%,
-    rgba(0,0,0,.1) 100%
-  );
+  position:absolute;inset:0;pointer-events:none;z-index:10;
+  background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.15) 100%);
 }
 
-/* Professional Headline */
 .headline-area{
-  margin:0 28px 20px;
-  padding:24px 28px;
-  background:linear-gradient(135deg,#c62828 0%,#b71c1c 100%);
+  margin:0 28px 20px;padding:24px 28px;
+  background:linear-gradient(135deg,#d32f2f 0%,#c62828 100%);
   border-radius:12px;
-  box-shadow:0 10px 25px rgba(211,47,47,.45),
-             0 1px 0 rgba(255,255,255,.1) inset;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  box-shadow:0 8px 20px rgba(0,0,0,.2);
+  display:flex;align-items:center;justify-content:center;
   min-height:90px;
 }
 
 .headline-text{
-  color:#fff;
-  font-weight:900;
-  line-height:1.5;
-  word-wrap:break-word;
-  overflow-wrap:break-word;
-  font-family:inherit;
+  color:#fff;font-weight:900;line-height:1.4;
   text-align:center;
-  text-shadow:0 2px 8px rgba(0,0,0,.5),
-              0 1px 2px rgba(0,0,0,.7);
+  text-shadow:0 1px 3px rgba(0,0,0,.6);
 }
 
-/* CTA Ribbon */
 .cta-ribbon{
-  margin:0 28px 22px;
-  padding:16px 28px;
-  background:linear-gradient(135deg,#d32f2f 0%,#a60000 100%);
-  color:#fff;
-  font-weight:800;
-  text-transform:uppercase;
-  letter-spacing:1.2px;
-  border-radius:10px;
-  text-align:center;
-  box-shadow:0 8px 20px rgba(211,47,47,.4);
-  text-shadow:0 2px 4px rgba(0,0,0,.3);
+  margin:0 28px 22px;padding:16px 28px;
+  background:linear-gradient(135deg,#ff9156 0%,#ff2b2f 100%);
+  color:#fff;font-weight:800;text-transform:uppercase;
+  letter-spacing:1.2px;border-radius:10px;text-align:center;
+  box-shadow:0 6px 15px rgba(0,0,0,.2);
 }
-
 .cta-ribbon.hidden{display:none;}
 
-/* Footer Bar */
 .footer-bar{
   background:linear-gradient(180deg,#1a1a1a 0%,#0a0a0a 100%);
   padding:16px 10px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+  display:flex;justify-content:center;align-items:center;
   gap:12px;
-  border-top:3px solid #d32f2f;
-  box-shadow:0 -4px 15px rgba(211,47,47,.3);
-  flex-wrap:nowrap;
+  border-top:3px solid #ff4444;
   overflow-x:auto;
 }
 
-.social-item{
-  display:flex;align-items:center;gap:6px;
-  font-size:0.85rem;font-weight:700;color:#fff;
-  text-shadow:0 1px 2px rgba(0,0,0,.5);
-}
+.social-item{display:flex;align-items:center;gap:6px;font-size:0.85rem;font-weight:700;color:#fff;}
 
-.social-icon{
-  width:28px;height:28px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:.85rem;color:#fff;
-  box-shadow:0 4px 10px rgba(0,0,0,.4);
-  border:2px solid rgba(255,255,255,.15);
-}
-
+.social-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:#fff;box-shadow:0 2px 5px rgba(0,0,0,.4);}
 .icon-facebook{background:#1877F2;}
 .icon-twitter{background:#000;}
 .icon-youtube{background:#FF0000;}
-.icon-instagram{
-  background:linear-gradient(45deg,
-    #f09433 0%,#e6683c 25%,
-    #dc2743 50%,#cc2366 75%,#bc1888 100%
-  );
-}
+.icon-instagram{background:linear-gradient(45deg,#f09433 0%,#dc2743 50%,#bc1888 100%)}
 
 .bangla-text{font-family:'Noto Sans Bengali',sans-serif;}
-
-.english-text {
-  font-weight:bold;font-size:40px;
-  font-family:"Poppins",sans-serif;
-}
-
-.bangla-text textarea,.bangla-text .headline-text {
-  font-weight:bold;font-size:40px;
-  font-family:"Noto Sans Bengali","SolaimanLipi",sans-serif;
-}
+.english-text {font-weight:bold;font-size:40px;font-family:"Poppins",sans-serif;}
+.bangla-text textarea,.bangla-text .headline-text {font-weight:bold;font-size:40px;font-family:"Noto Sans Bengali","SolaimanLipi",sans-serif;}
 
 @media(max-width:1200px){
   .main-container{grid-template-columns:1fr;}
@@ -429,71 +317,67 @@ body{
     <h1>📰 InfoMela Pro Studio</h1>
     <p>Professional news banner & video maker</p>
 
-    <div class="form-group">
-      <label>📅 Date</label>
-      <input type="date" id="bannerDate">
-    </div>
+    <div class="form-group"><label>📅 Date</label><input type="date" id="bannerDate"></div>
 
     <div class="form-group">
       <label>🎥 Platform Ratio</label>
       <select id="platformSelect">
-        <option value="fb-square">Facebook – Square (1:1)</option>
-        <option value="fb-landscape">Facebook – Landscape (16:9)</option>
-        <option value="fb-portrait">Facebook – Portrait (4:5)</option>
-        <option value="ig-story">Instagram Story/Reel (9:16)</option>
-        <option value="youtube">YouTube – Standard (16:9)</option>
+        <option value="fb-square">Square (1:1) - 2160x2160</option>
+        <option value="fb-portrait">Portrait (4:5) - 2160x2700</option>
+        <option value="ig-tall">Tall (2:3) - 1440x2160</option>
+        <option value="fb-landscape">Landscape (16:9) - 2560x1440</option>
+        <option value="yt-standard">YouTube (16:9) - 3840x2160</option>
+        <option value="ig-54">Insta Landscape (5:4) - 2700x2160</option>
+        <option value="ig-story">Story/Reel (9:16) - 2160x3840</option>
       </select>
     </div>
 
-    <div class="form-group">
-      <label>🖼️ Logo Upload</label>
+    <div class="form-group"><label>🖼️ Logo Upload</label>
       <div class="upload-box">
         <input type="file" id="logoInput" accept="image/*">
-        <div class="upload-icon">📷</div>
-        <div class="upload-text">Click to upload logo</div>
-        <div id="logoInfo" class="file-info"></div>
+        <div class="upload-icon">📷</div><div class="upload-text">Click to upload logo</div><div id="logoInfo" class="file-info"></div>
       </div>
     </div>
 
-    <div class="form-group">
-      <label>📸 Photo / Video Upload</label>
+    <div class="form-group"><label>📸 Photo / Video Upload</label>
       <div class="upload-box">
         <input type="file" id="mediaInput" accept="image/*,video/*">
-        <div class="upload-icon">🎥</div>
-        <div class="upload-text">Click to upload media</div>
-        <div id="mediaInfo" class="file-info"></div>
+        <div class="upload-icon">🎥</div><div class="upload-text">Click to upload media</div><div id="mediaInfo" class="file-info"></div>
       </div>
     </div>
 
-    <div class="form-group">
-      <label>✍️ English Headline</label>
+    <div class="form-group"><label>✍️ English Headline</label>
       <textarea id="captionEN" class="english-text" rows="3">Caption Here</textarea>
     </div>
 
-    <div class="form-group">
-      <label>✍️ বাংলা শিরোনাম</label>
+    <div class="form-group"><label>✍️ বাংলা শিরোনাম</label>
       <textarea id="captionBN" class="bangla-text" rows="3">ক্যাপশন এখানে</textarea>
+    </div>
+
+    <div class="editing-tools">
+      <h4>✨ Post-Processing Tools</h4>
+      <div class="checkbox-row">
+        <input type="checkbox" id="grayscaleFilter" onchange="updateFilters()">
+        <label for="grayscaleFilter">Grayscale Filter</label>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="vignetteFilter" onchange="updateFilters()">
+        <label for="vignetteFilter">Dramatic Vignette</label>
+      </div>
     </div>
 
     <div class="video-options">
       <h4>🎬 Video Settings</h4>
-      <div class="option-row">
-        <label>Duration (sec)</label>
-        <input type="number" id="videoDuration" min="5" max="15" value="10">
-      </div>
-      <div class="option-row">
-        <label>Frame Rate</label>
-        <select id="fps">
-          <option value="24">24 FPS</option>
-          <option value="30" selected>30 FPS</option>
-        </select>
+      <div class="option-row"><label>Duration (sec)</label><input type="number" id="videoDuration" min="5" max="15" value="10"></div>
+      <div class="option-row"><label>Frame Rate</label>
+        <select id="fps"><option value="24">24 FPS</option><option value="30" selected>30 FPS</option></select>
       </div>
     </div>
 
     <div class="advanced-toggle" onclick="toggleAdvancedOptions()">
-      <span>⚙️ Advanced Settings</span>
-      <span id="advancedArrow">▼</span>
+      <span>⚙️ Advanced Settings</span><span id="advancedArrow">▼</span>
     </div>
+
     <div class="advanced-content" id="advancedContent">
       <div class="range-row">
         <label>Animation Speed: <span id="speedValue">1x</span></label>
@@ -504,8 +388,12 @@ body{
         <input type="range" id="zoomEffect" min="0" max="20" step="1" value="5">
       </div>
       <div class="range-row">
-        <label>Output Quality: <span id="scaleValue">2.5x</span></label>
+        <label>Output Quality Scale: <span id="scaleValue">2.5x</span></label>
         <input type="range" id="imageScale" min="2" max="4" step="0.5" value="2.5">
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="noWatermark">
+        <label for="noWatermark">Disable Watermark</label>
       </div>
     </div>
 
@@ -535,21 +423,20 @@ body{
   <div class="preview-section">
     <div class="preview-container">
       <div class="preview-header">
-        <h2>English Preview</h2>
-        <span class="lang-badge">ENGLISH</span>
+        <h2>English Preview</h2><span class="lang-badge">ENGLISH</span>
       </div>
       <div class="banner-wrapper">
         <div class="banner" id="bannerEN">
+          <!-- Filter Classes added here by JS -->
           <div class="top-strip">
             <div class="brand-area">
-              <img class="brand-logo" id="logoEN"
-                src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='48'%3E%3Crect fill='%23fff' width='200' height='80' rx='10'/%3E%3Ctext x='100' y='50' font-family='Arial' font-size='32' font-weight='bold' fill='%23d32f2f' text-anchor='middle'%3EInfoMela%3C/text%3E%3C/svg%3E">
+              <img class="brand-logo" id="logoEN" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 48'%3E%3Crect fill='%23fff' width='120' height='48' rx='5'/%3E%3Ctext x='60' y='30' font-family='Poppins' font-size='16' font-weight='900' fill='%23d32f2f' text-anchor='middle'%3EInfoMela%3C/text%3E%3C/svg%3E">
               <span class="slogan">News.Fun.Facts</span>
             </div>
             <div class="date-badge" id="dateEN">14 OCTOBER 2025</div>
           </div>
           <div class="image-panel">
-            <img id="bgImageEN" src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80">
+            <img id="bgImageEN" src="https://images.unsplash.com/photo-1517430818204-58fffa8cb4cd?auto=format&fit=crop&w=1200&q=80">
             <div class="image-overlay"></div>
           </div>
           <div class="headline-area">
@@ -558,20 +445,16 @@ body{
           <div class="cta-ribbon" id="ctaEN">DETAILS IN COMMENTS</div>
           <div class="footer-bar">
             <div class="social-item">
-              <div class="social-icon icon-facebook">f</div>
-              <span>@theinfomelaa</span>
+              <div class="social-icon icon-facebook">f</div><span>@theinfomelaa</span>
             </div>
             <div class="social-item">
-              <div class="social-icon icon-twitter">𝕏</div>
-              <span>@theinfomela</span>
+              <div class="social-icon icon-twitter">𝕏</div><span>@theinfomela</span>
             </div>
             <div class="social-item">
-              <div class="social-icon icon-youtube">▶</div>
-              <span>@theinfomela</span>
+              <div class="social-icon icon-youtube">▶</div><span>@theinfomela</span>
             </div>
             <div class="social-item">
-              <div class="social-icon icon-instagram">⧉</div>
-              <span>@theinfomela</span>
+              <div class="social-icon icon-instagram">⧉</div><span>@theinfomela</span>
             </div>
           </div>
         </div>
@@ -580,21 +463,20 @@ body{
 
     <div class="preview-container">
       <div class="preview-header">
-        <h2>বাংলা প্রিভিউ</h2>
-        <span class="lang-badge bangla">বাংলা</span>
+        <h2>বাংলা প্রিভিউ</h2><span class="lang-badge bangla">বাংলা</span>
       </div>
       <div class="banner-wrapper">
         <div class="banner bangla-text" id="bannerBN">
+          <!-- Filter Classes added here by JS -->
           <div class="top-strip">
             <div class="brand-area">
-              <img class="brand-logo" id="logoBN"
-                src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='48'%3E%3Crect fill='%23fff' width='200' height='80' rx='10'/%3E%3Ctext x='100' y='50' font-family='Arial' font-size='32' font-weight='bold' fill='%23d32f2f' text-anchor='middle'%3Eইনফো মেলা%3C/text%3E%3C/svg%3E">
+              <img class="brand-logo" id="logoBN" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 48'%3E%3Crect fill='%23fff' width='120' height='48' rx='5'/%3E%3Ctext x='60' y='30' font-family='Noto Sans Bengali' font-size='16' font-weight='900' fill='%23d32f2f' text-anchor='middle'%3Eইনফো মেলা%3C/text%3E%3C/svg%3E">
               <span class="slogan">খবর.মজা.তথ্য</span>
             </div>
             <div class="date-badge" id="dateBN">১৪ অক্টোবর ২০২৫</div>
           </div>
           <div class="image-panel">
-            <img id="bgImageBN" src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80">
+            <img id="bgImageBN" src="https://images.unsplash.com/photo-1517430818204-58fffa8cb4cd?auto=format&fit=crop&w=1200&q=80">
             <div class="image-overlay"></div>
           </div>
           <div class="headline-area">
@@ -603,20 +485,16 @@ body{
           <div class="cta-ribbon" id="ctaBN">বিস্তারিত কমেন্টে</div>
           <div class="footer-bar">
             <div class="social-item">
-              <div class="social-icon icon-facebook">f</div>
-              <span>@theinfomelaa</span>
+              <div class="social-icon icon-facebook">f</div><span>@theinfomelaa</span>
             </div>
             <div class="social-item">
-              <div class="social-icon icon-twitter">𝕏</div>
-              <span>@theinfomela</span>
+              <div class="social-icon icon-twitter">𝕏</div><span>@theinfomela</span>
             </div>
             <div class="social-item">
-              <div class="social-icon icon-youtube">▶</div>
-              <span>@theinfomela</span>
+              <div class="social-icon icon-youtube">▶</div><span>@theinfomela</span>
             </div>
             <div class="social-item">
-              <div class="social-icon icon-instagram">⧉</div>
-              <span>@theinfomela</span>
+              <div class="social-icon icon-instagram">⧉</div><span>@theinfomela</span>
             </div>
           </div>
         </div>
@@ -627,11 +505,13 @@ body{
 
 <script>
 const PLATFORM_RATIOS={
-  'fb-square':{width:2160,height:2160},
-  'fb-landscape':{width:2560,height:1440},
-  'fb-portrait':{width:2160,height:2700},
-  'ig-story':{width:2160,height:3840},
-  'youtube':{width:3840,height:2160}
+  'fb-square':{width:2160,height:2160}, /* 1:1 */
+  'fb-portrait':{width:2160,height:2700}, /* 4:5 */
+  'ig-tall':{width:1440,height:2160}, /* 2:3 */
+  'fb-landscape':{width:2560,height:1440}, /* 16:9 (QHD) */
+  'yt-standard':{width:3840,height:2160}, /* 16:9 (4K UHD) */
+  'ig-54':{width:2700,height:2160}, /* 5:4 */
+  'ig-story':{width:2160,height:3840} /* 9:16 */
 };
 
 const state={logoObjectURL:null,mediaObjectURL:null,mediaType:'image'};
@@ -657,19 +537,17 @@ function initUI(){
   videoDuration.addEventListener('change',e=>{
     videoConfig.duration=Math.max(5,Math.min(15,+e.target.value||10));
   });
-  
   fps.addEventListener('change',e=>videoConfig.fps=+e.target.value);
   
+  // Advanced Controls
   animationSpeed.addEventListener('input',e=>{
     videoConfig.animationSpeed=+e.target.value;
     speedValue.textContent=e.target.value+'x';
   });
-  
   zoomEffect.addEventListener('input',e=>{
     videoConfig.zoomEffect=+e.target.value;
     zoomValue.textContent=e.target.value+'%';
   });
-  
   imageScale.addEventListener('input',e=>{
     videoConfig.scale=+e.target.value;
     scaleValue.textContent=e.target.value+'x';
@@ -701,9 +579,33 @@ function updateCaptions(){
   captionDisplayBN.textContent=captionBN.value.trim();
 }
 
+function updateFilters(){
+  const bannerEN = document.getElementById('bannerEN');
+  const bannerBN = document.getElementById('bannerBN');
+  
+  // Grayscale
+  if(document.getElementById('grayscaleFilter').checked) {
+    bannerEN.classList.add('grayscale');
+    bannerBN.classList.add('grayscale');
+  } else {
+    bannerEN.classList.remove('grayscale');
+    bannerBN.classList.remove('grayscale');
+  }
+
+  // Vignette
+  if(document.getElementById('vignetteFilter').checked) {
+    bannerEN.classList.add('vignette');
+    bannerBN.classList.add('vignette');
+  } else {
+    bannerEN.classList.remove('vignette');
+    bannerBN.classList.remove('vignette');
+  }
+}
+
 function updatePlatformRatio(){
   const ratio=PLATFORM_RATIOS[platformSelect.value];
-  const base=720;
+  const base=720; // Fixed preview width
+  
   document.querySelectorAll('.banner-wrapper').forEach(w=>{
     const b=w.querySelector('.banner');
     w.style.width=base+'px';
@@ -750,19 +652,45 @@ function handleMediaUpload(e){
   }
 }
 
+async function drawWatermark(ctx, canvasWidth, canvasHeight) {
+    if (document.getElementById('noWatermark').checked) return;
+
+    ctx.font = "bold 90px 'Bebas Neue', sans-serif";
+    ctx.fillStyle = "rgba(211, 47, 47, 0.05)"; 
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    const text = "Info Mela";
+    const angle = -45 * Math.PI / 180;
+    const spacing = 400; // spacing between repeating text
+
+    ctx.save();
+    ctx.rotate(angle);
+
+    // Calculate grid coverage after rotation
+    const diagonal = Math.sqrt(canvasWidth * canvasWidth + canvasHeight * canvasHeight);
+    
+    // Draw repeating watermark
+    for (let x = -diagonal; x < diagonal; x += spacing) {
+        for (let y = -diagonal; y < diagonal; y += spacing) {
+            ctx.fillText(text, x, y);
+        }
+    }
+    ctx.restore();
+}
+
 async function downloadBanner(lang,type){
   const banner=document.getElementById(lang==='english'?'bannerEN':'bannerBN');
   const ratio=PLATFORM_RATIOS[platformSelect.value];
   const progress=document.getElementById('progressIndicator');
   
   progress.classList.add('active');
-  progress.textContent=type==='image'?'Generating image...':'Rendering video...';
+  progress.textContent=type==='image'?'Generating ultimate image...':'Rendering ultimate video...';
   
   try{
     if(type==='image')await downloadImage(banner,lang,ratio);
     else await downloadVideo(banner,lang,ratio);
   }catch(e){
-    alert('Error: '+e.message);
+    alert('Error during download: '+e.message);
     console.error(e);
   }finally{
     progress.classList.remove('active');
@@ -770,6 +698,7 @@ async function downloadBanner(lang,type){
 }
 
 async function downloadImage(banner,lang,ratio){
+  // 1. Capture the HTML content
   const c=await html2canvas(banner,{
     scale:videoConfig.scale,
     useCORS:true,
@@ -778,6 +707,7 @@ async function downloadImage(banner,lang,ratio){
     logging:false
   });
   
+  // 2. Setup final output canvas
   const out=document.createElement('canvas');
   out.width=ratio.width;
   out.height=ratio.height;
@@ -789,27 +719,41 @@ async function downloadImage(banner,lang,ratio){
   ctx.imageSmoothingEnabled=true;
   ctx.imageSmoothingQuality='high';
   
-  // FIT TO CANVAS WITHOUT WHITE BORDERS
-  const scale=Math.max(
-    out.width/c.width,
-    out.height/c.height
-  );
+  // 3. Scaling logic: Fit the captured content into the output ratio
+  // This logic is crucial to ensure no white borders based on new HTML structure
+  const contentAspectRatio = c.width / c.height;
+  const targetAspectRatio = out.width / out.height;
+  let finalW, finalH, finalX, finalY;
   
-  const scaledW=c.width*scale;
-  const scaledH=c.height*scale;
-  const x=(out.width-scaledW)/2;
-  const y=(out.height-scaledH)/2;
+  if (contentAspectRatio > targetAspectRatio) {
+    // Banner is wider than output, fit to height
+    finalH = out.height;
+    finalW = finalH * contentAspectRatio;
+    finalX = (out.width - finalW) / 2;
+    finalY = 0;
+  } else {
+    // Banner is taller than output, fit to width
+    finalW = out.width;
+    finalH = finalW / contentAspectRatio;
+    finalX = 0;
+    finalY = (out.height - finalH) / 2;
+  }
+
+  // 4. Draw captured image
+  ctx.drawImage(c, finalX, finalY, finalW, finalH);
+
+  // 5. Draw repeating watermark (always last)
+  await drawWatermark(ctx, out.width, out.height);
   
-  ctx.drawImage(c,x,y,scaledW,scaledH);
-  
+  // 6. Download
   out.toBlob(b=>{
     const u=URL.createObjectURL(b);
     const a=document.createElement('a');
     a.href=u;
-    a.download=`InfoMela_${lang}_${Date.now()}.jpg`;
+    a.download=`InfoMela_${lang}_ULTRA_HD_${Date.now()}.jpg`;
     a.click();
     URL.revokeObjectURL(u);
-  },'image/jpeg',0.95);
+  },'image/jpeg',0.98);
 }
 
 async function downloadVideo(banner,lang,ratio){
@@ -832,13 +776,17 @@ async function downloadVideo(banner,lang,ratio){
   ctx.imageSmoothingEnabled=true;
   ctx.imageSmoothingQuality='high';
   
-  const types=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'];
+  const types=[
+    'video/webm;codecs=vp9',
+    'video/webm;codecs=vp8',
+    'video/webm'
+  ];
   let mime=types.find(t=>MediaRecorder.isTypeSupported(t))||'video/webm';
   
   const stream=vcan.captureStream(videoConfig.fps);
   const recorder=new MediaRecorder(stream,{
     mimeType:mime,
-    videoBitsPerSecond:4000000
+    videoBitsPerSecond:4000000 
   });
   
   const chunks=[];
@@ -849,33 +797,45 @@ async function downloadVideo(banner,lang,ratio){
   const total=videoConfig.duration*videoConfig.fps;
   let frameCount=0;
   
-  // FIT TO CANVAS WITHOUT WHITE BORDERS
-  const scale=Math.max(
-    vcan.width/canvas.width,
-    vcan.height/canvas.height
-  );
-  
+  const contentAspectRatio = canvas.width / canvas.height;
+  const targetAspectRatio = vcan.width / vcan.height;
+
   function draw(){
     const p=frameCount/total;
     
     ctx.fillStyle='#ffffff';
     ctx.fillRect(0,0,vcan.width,vcan.height);
-    
-    const zoomIntensity=videoConfig.zoomEffect/100;
-    const z=1+(zoomIntensity*Math.sin(p*Math.PI));
-    
-    const moveX=Math.sin(p*Math.PI*2)*20*videoConfig.animationSpeed;
-    const moveY=Math.cos(p*Math.PI*2)*10*videoConfig.animationSpeed;
-    
+
+    const zoomIntensity = videoConfig.zoomEffect / 100;
+    const z = 1 + (zoomIntensity * Math.sin(p * Math.PI));
+    const moveX = Math.sin(p * Math.PI * 2) * 20 * videoConfig.animationSpeed;
+    const moveY = Math.cos(p * Math.PI * 2) * 10 * videoConfig.animationSpeed;
+
     ctx.save();
-    ctx.translate(vcan.width/2+moveX,vcan.height/2+moveY);
-    ctx.scale(z,z);
+    ctx.translate(vcan.width / 2, vcan.height / 2);
+    ctx.scale(z, z);
     
-    const scaledW=canvas.width*scale;
-    const scaledH=canvas.height*scale;
-    
-    ctx.drawImage(canvas,-scaledW/2,-scaledH/2,scaledW,scaledH);
+    // Scaling loop (same as image)
+    let finalW, finalH, finalX, finalY;
+    if (contentAspectRatio > targetAspectRatio) {
+      finalH = vcan.height;
+      finalW = finalH * contentAspectRatio;
+    } else {
+      finalW = vcan.width;
+      finalH = finalW / contentAspectRatio;
+    }
+
+    ctx.drawImage(
+      canvas,
+      (-finalW / 2) + moveX, 
+      (-finalH / 2) + moveY, 
+      finalW, 
+      finalH
+    );
     ctx.restore();
+
+    // Draw watermark on video frame
+    drawWatermark(ctx, vcan.width, vcan.height);
     
     if(frameCount%30===0){
       progress.textContent=`Rendering: ${Math.round((frameCount/total)*100)}%`;
@@ -906,7 +866,7 @@ async function downloadVideo(banner,lang,ratio){
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;
-  a.download=`InfoMela_${lang}_${Date.now()}.webm`;
+  a.download=`InfoMela_${lang}_VIDEO_HD_${Date.now()}.webm`;
   document.body.appendChild(a);
   a.click();
   a.remove();
